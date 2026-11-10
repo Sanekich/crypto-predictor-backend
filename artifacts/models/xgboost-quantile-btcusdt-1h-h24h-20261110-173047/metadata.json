@@ -1,0 +1,221 @@
+{
+  "model_id": "xgboost-quantile-btcusdt-1h-h24h-20261110-173047",
+  "model_type": "xgboost_quantile",
+  "trained_at": "2026-11-10T17:30:47.480622+00:00",
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "horizon": "24h",
+  "horizon_periods": 24,
+  "target": "target_return_24h",
+  "quantiles": [
+    0.1,
+    0.5,
+    0.9
+  ],
+  "feature_columns": [
+    "log_return_1",
+    "log_return_3",
+    "log_return_6",
+    "log_return_12",
+    "log_return_24",
+    "log_return_72",
+    "log_return_168",
+    "close_to_sma_24",
+    "close_to_sma_72",
+    "close_to_sma_168",
+    "sma_24_change_24",
+    "close_to_ema_12",
+    "ema_12_to_ema_26",
+    "rsi_14",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "volatility_24",
+    "volatility_168",
+    "volatility_ratio_24_168",
+    "candle_range_pct",
+    "atr_14_pct",
+    "volume_change_1",
+    "volume_ratio_24",
+    "volume_ratio_168",
+    "volume_zscore_168",
+    "taker_buy_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "feature_pipeline_version": "1.0",
+  "feature_config": {
+    "return_windows": [
+      1,
+      3,
+      6,
+      12,
+      24,
+      72,
+      168
+    ],
+    "sma_windows": [
+      24,
+      72,
+      168
+    ],
+    "sma_change_window": 24,
+    "ema_fast": 12,
+    "ema_slow": 26,
+    "macd_signal": 9,
+    "rsi_window": 14,
+    "atr_window": 14,
+    "volatility_windows": [
+      24,
+      168
+    ],
+    "volume_windows": [
+      24,
+      168
+    ],
+    "time_features": true
+  },
+  "params": {
+    "quantiles": [
+      0.1,
+      0.5,
+      0.9
+    ],
+    "n_estimators": 2000,
+    "learning_rate": 0.02,
+    "max_depth": 4,
+    "min_child_weight": 50,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "early_stopping_rounds": 100,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_info": {
+    "best_iteration": 771
+  },
+  "split": {
+    "gap": "1 days 00:00:00",
+    "train": {
+      "rows": 53243,
+      "start": "2017-08-24T04:00:00+00:00",
+      "end": "2024-04-01T10:00:00+00:00"
+    },
+    "validation": {
+      "rows": 11390,
+      "start": "2024-04-02T11:00:00+00:00",
+      "end": "2025-07-21T00:00:00+00:00"
+    },
+    "test": {
+      "rows": 11415,
+      "start": "2025-07-22T01:00:00+00:00",
+      "end": "2026-11-09T15:00:00+00:00"
+    }
+  },
+  "metrics": {
+    "train": {
+      "n": 53243,
+      "nominal_coverage": 0.8,
+      "coverage": 0.806697594049922,
+      "mean_width": 0.07625691659062503,
+      "mean_width_bps": 762.5691659062503,
+      "pinball_mean": 0.008010017159633058,
+      "below_q0.1": 0.0965572939165712,
+      "below_q0.5": 0.4996149728602821,
+      "below_q0.9": 0.9032548879664932,
+      "width_correlation": 0.4876385356649046
+    },
+    "validation": {
+      "n": 11390,
+      "nominal_coverage": 0.8,
+      "coverage": 0.8231782265144864,
+      "mean_width": 0.06247820893177457,
+      "mean_width_bps": 624.7820893177457,
+      "pinball_mean": 0.005935869584612496,
+      "below_q0.1": 0.09350307287093942,
+      "below_q0.5": 0.4939420544337138,
+      "below_q0.9": 0.9166812993854259,
+      "width_correlation": 0.26365564055931917
+    },
+    "test": {
+      "n": 11415,
+      "nominal_coverage": 0.8,
+      "coverage": 0.8360928602715725,
+      "mean_width": 0.05582367154988662,
+      "mean_width_bps": 558.2367154988663,
+      "pinball_mean": 0.0051140374301796125,
+      "below_q0.1": 0.09960578186596583,
+      "below_q0.5": 0.5307928164695576,
+      "below_q0.9": 0.9356986421375383,
+      "width_correlation": 0.2884199248712987
+    }
+  },
+  "selection_metric": "validation pinball loss (early stopping)",
+  "improvement_vs_baseline": {
+    "baseline": "historical_quantiles",
+    "pinball": {
+      "validation": 0.04686998349102123,
+      "test": 0.09040587507822295
+    }
+  },
+  "baselines": {
+    "historical_quantiles": {
+      "train": {
+        "n": 53243,
+        "nominal_coverage": 0.8,
+        "coverage": 0.799973705463629,
+        "mean_width": 0.0809643832315481,
+        "mean_width_bps": 809.6438323154811,
+        "pinball_mean": 0.008987521365051387,
+        "below_q0.1": 0.10001314726818548,
+        "below_q0.5": 0.4999906090941532,
+        "below_q0.9": 0.8999868527318146,
+        "width_correlation": null
+      },
+      "validation": {
+        "n": 11390,
+        "nominal_coverage": 0.8,
+        "coverage": 0.8975417032484636,
+        "mean_width": 0.08096438323154811,
+        "mean_width_bps": 809.6438323154812,
+        "pinball_mean": 0.00622776481885835,
+        "below_q0.1": 0.05267778753292362,
+        "below_q0.5": 0.49596136962247583,
+        "below_q0.9": 0.9502194907813872,
+        "width_correlation": null
+      },
+      "test": {
+        "n": 11415,
+        "nominal_coverage": 0.8,
+        "coverage": 0.9343845816907578,
+        "mean_width": 0.0809643832315481,
+        "mean_width_bps": 809.6438323154811,
+        "pinball_mean": 0.005622329003740441,
+        "below_q0.1": 0.03810775295663601,
+        "below_q0.5": 0.5272886552781428,
+        "below_q0.9": 0.9724923346473938,
+        "width_correlation": null
+      }
+    }
+  },
+  "dataset": {
+    "path": "features\\binance\\BTCUSDT_1h_h24h.parquet",
+    "sha256": "81335093deed1ee16cc0a8804e12f6843eddcf5f027058fabb92766d8ae725d2",
+    "source_file": "processed\\binance\\BTCUSDT_1h.parquet",
+    "source_sha256": "20d3d070e91bdcf6114848e1d6bee614c3b96c14c70f166087171c3e062d9aed"
+  },
+  "code_version": {
+    "commit": "47ac9cfaef5f6b8d15cf18efdf712d624385edde",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.12.10",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1"
+  }
+}

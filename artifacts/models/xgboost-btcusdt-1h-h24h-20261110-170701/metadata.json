@@ -1,0 +1,283 @@
+{
+  "model_id": "xgboost-btcusdt-1h-h24h-20261110-170701",
+  "model_type": "xgboost",
+  "trained_at": "2026-11-10T17:07:01.057938+00:00",
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "horizon": "24h",
+  "horizon_periods": 24,
+  "target": "target_return_24h",
+  "feature_columns": [
+    "log_return_1",
+    "log_return_3",
+    "log_return_6",
+    "log_return_12",
+    "log_return_24",
+    "log_return_72",
+    "log_return_168",
+    "close_to_sma_24",
+    "close_to_sma_72",
+    "close_to_sma_168",
+    "sma_24_change_24",
+    "close_to_ema_12",
+    "ema_12_to_ema_26",
+    "rsi_14",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "volatility_24",
+    "volatility_168",
+    "volatility_ratio_24_168",
+    "candle_range_pct",
+    "atr_14_pct",
+    "volume_change_1",
+    "volume_ratio_24",
+    "volume_ratio_168",
+    "volume_zscore_168",
+    "taker_buy_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "feature_pipeline_version": "1.0",
+  "feature_config": {
+    "return_windows": [
+      1,
+      3,
+      6,
+      12,
+      24,
+      72,
+      168
+    ],
+    "sma_windows": [
+      24,
+      72,
+      168
+    ],
+    "sma_change_window": 24,
+    "ema_fast": 12,
+    "ema_slow": 26,
+    "macd_signal": 9,
+    "rsi_window": 14,
+    "atr_window": 14,
+    "volatility_windows": [
+      24,
+      168
+    ],
+    "volume_windows": [
+      24,
+      168
+    ],
+    "time_features": true
+  },
+  "params": {
+    "n_estimators": 2000,
+    "learning_rate": 0.02,
+    "max_depth": 4,
+    "min_child_weight": 50,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "objective": "reg:squarederror",
+    "tree_method": "hist",
+    "eval_metric": "rmse",
+    "early_stopping_rounds": 100,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_info": {
+    "best_iteration": 0
+  },
+  "split": {
+    "gap": "1 days 00:00:00",
+    "train": {
+      "rows": 53243,
+      "start": "2017-08-24T04:00:00+00:00",
+      "end": "2024-04-01T10:00:00+00:00"
+    },
+    "validation": {
+      "rows": 11390,
+      "start": "2024-04-02T11:00:00+00:00",
+      "end": "2025-07-21T00:00:00+00:00"
+    },
+    "test": {
+      "rows": 11415,
+      "start": "2025-07-22T01:00:00+00:00",
+      "end": "2026-11-09T15:00:00+00:00"
+    }
+  },
+  "metrics": {
+    "train": {
+      "n": 53243,
+      "mae": 0.025527855783586767,
+      "mae_bps": 255.27855783586767,
+      "mse": 0.0014896861268781055,
+      "rmse": 0.0385964522576636,
+      "direction_accuracy": 0.5231110192889206,
+      "correlation": 0.21600505204659037
+    },
+    "validation": {
+      "n": 11390,
+      "mae": 0.017985188303551922,
+      "mae_bps": 179.85188303551922,
+      "mse": 0.0006166722273450704,
+      "rmse": 0.024832886005155954,
+      "direction_accuracy": 0.5271290605794556,
+      "correlation": -0.01034401381635979
+    },
+    "test": {
+      "n": 11415,
+      "mae": 0.015413133906126012,
+      "mae_bps": 154.13133906126012,
+      "mse": 0.00046738908022824047,
+      "rmse": 0.0216191831535847,
+      "direction_accuracy": 0.502233902759527,
+      "correlation": 0.04682356933294224
+    }
+  },
+  "selection_metric": "validation rmse",
+  "improvement_vs_best_baseline": {
+    "baseline": "ridge",
+    "validation_rmse": -0.0003844922770759251
+  },
+  "baselines": {
+    "zero_return": {
+      "train": {
+        "n": 53243,
+        "mae": 0.0255516246686159,
+        "mae_bps": 255.516246686159,
+        "mse": 0.001495744470238802,
+        "rmse": 0.0386748557882095,
+        "direction_accuracy": 0.4768889807110794,
+        "correlation": null
+      },
+      "validation": {
+        "n": 11390,
+        "mae": 0.01800260345817238,
+        "mae_bps": 180.02603458172382,
+        "mse": 0.0006189429309050229,
+        "rmse": 0.02487856368251638,
+        "direction_accuracy": 0.4728709394205443,
+        "correlation": null
+      },
+      "test": {
+        "n": 11415,
+        "mae": 0.015330530650873331,
+        "mae_bps": 153.3053065087333,
+        "mse": 0.00046154642835583975,
+        "rmse": 0.021483631637966606,
+        "direction_accuracy": 0.49776609724047305,
+        "correlation": null
+      }
+    },
+    "historical_mean": {
+      "train": {
+        "n": 53243,
+        "mae": 0.025543628686965126,
+        "mae_bps": 255.43628686965127,
+        "mse": 0.001492409314277746,
+        "rmse": 0.03863171384080372,
+        "direction_accuracy": 0.5231110192889206,
+        "correlation": null
+      },
+      "validation": {
+        "n": 11390,
+        "mae": 0.017984555547962747,
+        "mae_bps": 179.84555547962748,
+        "mse": 0.0006166522954086246,
+        "rmse": 0.02483248468052733,
+        "direction_accuracy": 0.5271290605794556,
+        "correlation": null
+      },
+      "test": {
+        "n": 11415,
+        "mae": 0.01541670057116311,
+        "mae_bps": 154.1670057116311,
+        "mse": 0.0004675905463724687,
+        "rmse": 0.02162384208165766,
+        "direction_accuracy": 0.502233902759527,
+        "correlation": null
+      }
+    },
+    "ridge": {
+      "train": {
+        "n": 53243,
+        "mae": 0.025592060754566933,
+        "mae_bps": 255.92060754566933,
+        "mse": 0.0014628043940957377,
+        "rmse": 0.03824662591779486,
+        "direction_accuracy": 0.5032210807054448,
+        "correlation": 0.14084543615491188
+      },
+      "validation": {
+        "n": 11390,
+        "mae": 0.01814024816039285,
+        "mae_bps": 181.4024816039285,
+        "mse": 0.0006161982892830673,
+        "rmse": 0.024823341622011073,
+        "direction_accuracy": 0.5032484635645302,
+        "correlation": 0.07217197725429522
+      },
+      "test": {
+        "n": 11415,
+        "mae": 0.015593205869071777,
+        "mae_bps": 155.93205869071778,
+        "mse": 0.0004646860001999705,
+        "rmse": 0.021556576727299964,
+        "direction_accuracy": 0.501533070521244,
+        "correlation": 0.06518931844611986
+      }
+    }
+  },
+  "feature_importance": {
+    "volatility_168": 0.19988180027863914,
+    "log_return_168": 0.10316156308287049,
+    "atr_14_pct": 0.10002920364889756,
+    "close_to_sma_168": 0.06600614041813307,
+    "log_return_24": 0.06471115063559957,
+    "volatility_ratio_24_168": 0.06062821956042165,
+    "weekday_sin": 0.05114162848198169,
+    "log_return_72": 0.046101572754789315,
+    "sma_24_change_24": 0.04484397229011667,
+    "weekday_cos": 0.0440625764186961,
+    "macd_pct": 0.041829053618939536,
+    "ema_12_to_ema_26": 0.026791478018446165,
+    "volatility_24": 0.026755987047015675,
+    "macd_signal_pct": 0.024507520680341014,
+    "close_to_sma_72": 0.017040881672559318,
+    "log_return_6": 0.01601166376811876,
+    "rsi_14": 0.014034843344381213,
+    "close_to_sma_24": 0.011792251887010873,
+    "taker_buy_ratio": 0.008558254073138767,
+    "macd_hist_pct": 0.007602723761898569,
+    "log_return_3": 0.0050902926618645,
+    "log_return_1": 0.003699644544025532,
+    "volume_zscore_168": 0.0035680696293710294,
+    "volume_ratio_24": 0.0028448057617347544,
+    "hour_cos": 0.0025099209422207746,
+    "log_return_12": 0.0022512366182159587,
+    "volume_ratio_168": 0.0018285080976788541,
+    "hour_sin": 0.0012313404983208991,
+    "volume_change_1": 0.000955026062969631,
+    "candle_range_pct": 0.000329885826506326,
+    "close_to_ema_12": 0.0001987839150966248
+  },
+  "dataset": {
+    "path": "features\\binance\\BTCUSDT_1h_h24h.parquet",
+    "sha256": "81335093deed1ee16cc0a8804e12f6843eddcf5f027058fabb92766d8ae725d2",
+    "source_file": "processed\\binance\\BTCUSDT_1h.parquet",
+    "source_sha256": "20d3d070e91bdcf6114848e1d6bee614c3b96c14c70f166087171c3e062d9aed"
+  },
+  "code_version": {
+    "commit": "47ac9cfaef5f6b8d15cf18efdf712d624385edde",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.12.10",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1"
+  }
+}

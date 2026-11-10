@@ -69,6 +69,24 @@ python scripts/download_data.py --full-refresh         # скачать зано
 не обновляется. Пропуски свечей (например, техработы биржи) не заполняются
 автоматически — они перечислены в отчёте.
 
+## Сбор живых данных
+
+Стакан заявок, поток сделок, funding, open interest и ликвидации нельзя скачать задним
+числом — их нужно записывать в момент, когда они происходят:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\collect_live.py     # работает, пока не нажать Ctrl+C
+```
+
+- Данные: `data/live/<набор>/BTCUSDT/<дата>/<час>.parquet`, одна строка в минуту.
+- Наборы: `trades_spot`, `trades_futures`, `book_spot`, `book_futures`, `mark_price`,
+  `open_interest`, `liquidations`, `connection_events` (подключения/обрывы — для учёта пропусков).
+- Состояние: `GET /live/status/BTCUSDT` или файл `data/live/_status_BTCUSDT.json`.
+- Обрывы связи переподключаются автоматически; неполные минуты не записываются.
+- Запускайте **один** экземпляр сборщика. Каждый час простоя — пропуск в истории.
+
+План использования этих данных: [docs/direction_prediction_plan.md](docs/direction_prediction_plan.md).
+
 ## Признаки для ML
 
 После загрузки данных собрать датасет (признаки + целевая доходность):

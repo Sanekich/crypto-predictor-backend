@@ -17,14 +17,14 @@ venv/
 .env.*
 !.env.example
 
-# Data and model artifacts (keep folder structure only)
-data/raw/*
-data/processed/*
-data/features/
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-artifacts/*
-!artifacts/.gitkeep
+# Data (data/) and trained models (artifacts/) ARE committed, so that a fresh
+# clone and the hosted server (Render) work without retraining.
+# Only temporary files of atomic writes are ignored.
+*.tmp
+
+# Manual backup archives
+*.rar
+*.zip
 
 # Notebooks
 .ipynb_checkpoints/

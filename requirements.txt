@@ -15,10 +15,13 @@ scikit-learn
 xgboost
 optuna
 
+# Market data (Binance REST + real-time streams)
+httpx
+websockets
+
 # Utilities
 python-dotenv
 joblib
 
 # Testing
 pytest
-httpx
