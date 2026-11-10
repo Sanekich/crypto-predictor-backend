@@ -98,7 +98,7 @@ def build_features(ohlcv: pd.DataFrame, interval: str, config: FeatureConfig | N
     # Calendar (candle open time, UTC); known in advance, no leakage
     if config.time_features:
         hour = df["timestamp"].dt.hour
-        weekday = df["timestamp"].dt.dayofweek
+        weekday = df["timestamp"].dt.day_of_week
         f["hour_sin"] = np.sin(2 * np.pi * hour / 24)
         f["hour_cos"] = np.cos(2 * np.pi * hour / 24)
         f["weekday_sin"] = np.sin(2 * np.pi * weekday / 7)
