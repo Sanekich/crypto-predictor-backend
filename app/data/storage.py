@@ -4,6 +4,7 @@ Layout:
     data/raw/<provider>/<SYMBOL>_<interval>.parquet
     data/processed/<provider>/<SYMBOL>_<interval>.parquet
     data/processed/<provider>/<SYMBOL>_<interval>.report.json
+    data/features/<provider>/<SYMBOL>_<interval>_h<horizon>.parquet (+ .meta.json)
 """
 
 import json
@@ -52,6 +53,31 @@ class MarketDataStorage:
         text = json.dumps(report, ensure_ascii=False, indent=2)
         _atomic_write(path, lambda tmp: tmp.write_text(text, encoding="utf-8"))
         return path
+
+    def features_path(self, provider: str, symbol: str, interval: str, horizon: str) -> Path:
+        return self.data_dir / "features" / provider / f"{symbol.upper()}_{interval}_h{horizon}.parquet"
+
+    def features_meta_path(self, provider: str, symbol: str, interval: str, horizon: str) -> Path:
+        return self.features_path(provider, symbol, interval, horizon).with_suffix(".meta.json")
+
+    def save_features(
+        self,
+        df: pd.DataFrame,
+        meta: dict[str, Any],
+        provider: str,
+        symbol: str,
+        interval: str,
+        horizon: str,
+    ) -> tuple[Path, Path]:
+        path = self.features_path(provider, symbol, interval, horizon)
+        meta_path = self.features_meta_path(provider, symbol, interval, horizon)
+        _atomic_write(path, lambda tmp: df.to_parquet(tmp, index=False))
+        text = json.dumps(meta, ensure_ascii=False, indent=2)
+        _atomic_write(meta_path, lambda tmp: tmp.write_text(text, encoding="utf-8"))
+        return path, meta_path
+
+    def load_features(self, provider: str, symbol: str, interval: str, horizon: str) -> pd.DataFrame | None:
+        return self._read_parquet(self.features_path(provider, symbol, interval, horizon))
 
     @staticmethod
     def _read_parquet(path: Path) -> pd.DataFrame | None:

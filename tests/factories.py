@@ -2,6 +2,7 @@
 
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from app.data.processing.cleaning import klines_to_raw_frame, normalize_klines
@@ -33,6 +34,32 @@ def make_klines(count: int, start_ms: int = START_MS, step_ms: int = HOUR_MS) ->
             ]
         )
     return rows
+
+
+def make_random_ohlcv(count: int, seed: int = 0, start_ms: int = START_MS, step_ms: int = HOUR_MS) -> pd.DataFrame:
+    """Random-walk OHLCV with realistic structure (for feature tests)."""
+    rng = np.random.default_rng(seed)
+    close = 100 * np.exp(np.cumsum(rng.normal(0, 0.01, count)))
+    open_ = np.concatenate([[100.0], close[:-1]])
+    spread = np.abs(rng.normal(0, 0.005, count)) * close
+    volume = rng.gamma(2.0, 50.0, count)
+    volume[rng.random(count) < 0.01] = 0.0  # occasional zero-volume candle
+    timestamps = pd.to_datetime(start_ms + np.arange(count) * step_ms, unit="ms", utc=True)
+    return pd.DataFrame(
+        {
+            "timestamp": timestamps,
+            "open": open_,
+            "high": np.maximum(open_, close) + spread,
+            "low": np.minimum(open_, close) - spread,
+            "close": close,
+            "volume": volume,
+            "quote_volume": volume * close,
+            "trades": rng.integers(10, 1000, count),
+            "taker_buy_base": volume * rng.uniform(0.3, 0.7, count),
+            "taker_buy_quote": volume * close * 0.5,
+            "close_time": timestamps + pd.Timedelta(milliseconds=step_ms - 1),
+        }
+    )
 
 
 def make_ohlcv(count: int, start_ms: int = START_MS, step_ms: int = HOUR_MS) -> pd.DataFrame:

@@ -20,6 +20,7 @@ venv/
 # Data and model artifacts (keep folder structure only)
 data/raw/*
 data/processed/*
+data/features/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 artifacts/*
