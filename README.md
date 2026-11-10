@@ -33,6 +33,29 @@ uvicorn app.main:app --reload
 - Health: http://127.0.0.1:8000/health
 - Документация: http://127.0.0.1:8000/docs
 
+## Загрузка рыночных данных
+
+Свечи OHLCV загружаются с публичного API Binance (ключ не нужен):
+
+```powershell
+python scripts/download_data.py                        # BTCUSDT 1h, вся история с 2017-08-17
+python scripts/download_data.py --interval 4h          # другой таймфрейм
+python scripts/download_data.py --symbol ETHUSDT --start 2020-01-01
+python scripts/download_data.py --full-refresh         # скачать заново, игнорируя сохранённое
+```
+
+Повторный запуск докачивает только новые свечи. Результат:
+
+| Файл | Содержимое |
+|---|---|
+| `data/raw/binance/BTCUSDT_1h.parquet` | данные как пришли от Binance |
+| `data/processed/binance/BTCUSDT_1h.parquet` | только закрытые свечи, UTC, без дубликатов, проверенные |
+| `data/processed/binance/BTCUSDT_1h.report.json` | отчёт о качестве: ошибки и пропуски |
+
+Если проверка находит ошибки (некорректные цены, дубликаты и т. п.), processed-файл
+не обновляется. Пропуски свечей (например, техработы биржи) не заполняются
+автоматически — они перечислены в отчёте.
+
 ## Тесты
 
 ```powershell

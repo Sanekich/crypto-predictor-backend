@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = False
     app_version: str = "0.1.0"
+    log_level: str = "INFO"
 
     api_host: str = "127.0.0.1"
     api_port: int = 8000
@@ -26,7 +27,9 @@ class Settings(BaseSettings):
     market_data_provider: str = "binance"
     market_data_api_key: str | None = None
     market_data_api_secret: str | None = None
+    binance_base_url: str = "https://api.binance.com"
 
+    data_dir: Path = Path("data")
     model_artifacts_dir: Path = Path("artifacts")
 
 
