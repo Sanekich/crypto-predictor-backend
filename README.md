@@ -23,6 +23,19 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 Copy-Item .env.example .env
 ```
 
+## Подготовка данных и моделей (на каждом новом компьютере)
+
+Данные (`data/`) и обученные модели (`artifacts/`) не хранятся в Git. После клонирования
+и установки зависимостей их нужно создать одной командой (~3–5 минут):
+
+```powershell
+.\.venv\Scripts\python.exe scripts\setup.py
+```
+
+Скрипт скачает свечи с Binance, соберёт признаки и обучит модели диапазона на 24h и 7d.
+Повторный запуск только докачивает новые данные; `--retrain` обучает модели заново.
+Без этого шага API отвечает ошибкой `MODEL_NOT_AVAILABLE`.
+
 ## Запуск
 
 ```powershell
