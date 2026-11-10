@@ -1,8 +1,87 @@
 """Metrics for return forecasts."""
 
 import math
+from typing import Any
 
 import numpy as np
+
+
+SIGNAL_THRESHOLDS = (0.6, 0.65, 0.7, 0.75, 0.8)
+
+
+def wilson_lower_bound(successes: int, n: int, z: float = 1.96) -> float | None:
+    """Lower end of the 95% confidence interval for a hit rate (Wilson score)."""
+    if n == 0:
+        return None
+    p = successes / n
+    denominator = 1 + z * z / n
+    centre = p + z * z / (2 * n)
+    margin = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
+    return (centre - margin) / denominator
+
+
+def independent_positions(positions: np.ndarray, spacing: int) -> np.ndarray:
+    """Greedily keep positions at least `spacing` rows apart.
+
+    Signals on overlapping horizons (e.g. every hour for a 4-hour horizon)
+    describe the same price move and must not be counted as separate evidence.
+    """
+    kept: list[int] = []
+    for pos in positions:
+        if not kept or pos - kept[-1] >= spacing:
+            kept.append(int(pos))
+    return np.asarray(kept, dtype=int)
+
+
+def direction_metrics(
+    y_up: np.ndarray,
+    p_up: np.ndarray,
+    horizon_periods: int = 1,
+    thresholds: tuple[float, ...] = SIGNAL_THRESHOLDS,
+) -> dict[str, Any]:
+    """Quality of direction probabilities and of high-confidence signals.
+
+    A signal at threshold t is any row with max(p, 1 - p) >= t, predicting
+    "up" if p >= 0.5. For each threshold: how often signals occur, how often
+    they were right, and the 95% lower bound of that hit rate computed on
+    independent (non-overlapping) signals only.
+    """
+    y = np.asarray(y_up, dtype="float64")
+    p = np.clip(np.asarray(p_up, dtype="float64"), 1e-6, 1 - 1e-6)
+    base_rate = float(np.mean(y))
+    predicted_up = p >= 0.5
+    correct = predicted_up == (y == 1)
+    confidence = np.maximum(p, 1 - p)
+
+    signals: dict[str, Any] = {}
+    for t in thresholds:
+        mask = confidence >= t
+        positions = np.flatnonzero(mask)
+        independent = independent_positions(positions, horizon_periods)
+        hits = int(correct[independent].sum())
+        signals[f"{t:.2f}"] = {
+            "signals": int(mask.sum()),
+            "share_of_time": float(mask.mean()),
+            "hit_rate": float(correct[mask].mean()) if mask.any() else None,
+            "independent_signals": int(len(independent)),
+            "independent_hit_rate": hits / len(independent) if len(independent) else None,
+            "hit_rate_lower_95": wilson_lower_bound(hits, len(independent)),
+        }
+
+    log_loss = float(-np.mean(y * np.log(p) + (1 - y) * np.log(1 - p)))
+    base = np.clip(base_rate, 1e-6, 1 - 1e-6)
+    return {
+        "n": int(y.size),
+        "base_rate_up": base_rate,
+        "accuracy": float(np.mean(correct)),
+        "always_up_accuracy": max(base_rate, 1 - base_rate),
+        "brier": float(np.mean((p - y) ** 2)),
+        "brier_base_rate": float(np.mean((base_rate - y) ** 2)),
+        "log_loss": log_loss,
+        "log_loss_base_rate": float(-(base_rate * np.log(base) + (1 - base_rate) * np.log(1 - base))),
+        "max_confidence": float(confidence.max()),
+        "signals": signals,
+    }
 
 
 def pinball_loss(y_true: np.ndarray, y_pred: np.ndarray, quantile: float) -> float:

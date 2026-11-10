@@ -1,0 +1,23 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Dashboard -> New -> Blueprint -> select this repository.
+services:
+  - type: web
+    name: crypto-predictor-backend
+    runtime: python
+    # Frankfurt: Binance blocks requests from US data centers
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      # Allows the frontend static site (and its preview deployments) to call the API
+      - key: CORS_ORIGIN_REGEX
+        value: https://crypto-predictor-frontend[a-z0-9-]*\.onrender\.com

@@ -6,7 +6,6 @@ Rules (architecture doc, section 12):
 - stale or incomplete data produce an error, never a made-up forecast.
 """
 
-import json
 import logging
 import threading
 from collections.abc import Callable
@@ -17,13 +16,12 @@ import numpy as np
 import pandas as pd
 
 from app.core.exceptions import (
-    DataNotAvailableError,
     DataStaleError,
     ModelIncompatibleError,
     ModelNotAvailableError,
 )
 from app.data.intervals import interval_to_timedelta
-from app.features.feature_pipeline import FEATURE_PIPELINE_VERSION, FeatureConfig, build_features
+from app.features.feature_pipeline import FeatureConfig
 from app.ml.models.quantile_model import QuantileModel
 from app.ml.registry.model_registry import ModelRegistry
 from app.schemas.prediction import (
@@ -33,6 +31,7 @@ from app.schemas.prediction import (
     PredictionResponse,
     PriceRange,
 )
+from app.services.features_service import FEATURE_HISTORY_ROWS, check_compatibility, latest_features
 from app.services.market_data_service import MarketDataService
 
 logger = logging.getLogger(__name__)
@@ -42,17 +41,11 @@ RETURN_MODEL_TYPE = "xgboost"
 
 ASSET_NAMES = {"BTCUSDT": "Bitcoin", "ETHUSDT": "Ethereum", "SOLUSDT": "Solana"}
 
-# Enough history for all rolling windows and for exponential averages to converge
-FEATURE_HISTORY_ROWS = 2000
+__all__ = ["FEATURE_HISTORY_ROWS", "PredictionService"]
 
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
-
-
-def _normalized(value: Any) -> Any:
-    """Compare configs the way they are stored in JSON (tuples become lists)."""
-    return json.loads(json.dumps(value))
 
 
 class PredictionService:
@@ -96,7 +89,7 @@ class PredictionService:
         meta = self._registry.latest(RANGE_MODEL_TYPE, symbol, self._interval, horizon)
         if meta is None:
             raise ModelNotAvailableError(f"No trained range model for {symbol} {self._interval} horizon {horizon}.")
-        self._check_compatibility(meta)
+        check_compatibility(meta, self._feature_config)
 
         ohlcv = self._market_data.get_ohlcv(symbol, self._interval)
         step = interval_to_timedelta(self._interval)
@@ -112,7 +105,7 @@ class PredictionService:
         if cached is not None:
             return cached
 
-        x = self._latest_features(ohlcv, meta["feature_columns"], last_open)
+        x = latest_features(ohlcv, self._interval, meta["feature_columns"], self._feature_config)
         model = self._load_model(meta["model_id"])
         quantile_returns = model.predict_quantiles(x)[0]
         quantiles = list(model.quantiles)
@@ -150,33 +143,6 @@ class PredictionService:
         return response
 
     # --- internals ------------------------------------------------------------
-
-    def _check_compatibility(self, meta: dict[str, Any]) -> None:
-        if meta.get("feature_pipeline_version") != FEATURE_PIPELINE_VERSION:
-            raise ModelIncompatibleError(
-                f"Model {meta['model_id']} was trained with feature pipeline "
-                f"{meta.get('feature_pipeline_version')}, current is {FEATURE_PIPELINE_VERSION}. Retrain the model."
-            )
-        if meta.get("feature_config") != _normalized(self._feature_config.to_dict()):
-            raise ModelIncompatibleError(f"Model {meta['model_id']} uses a different feature configuration. Retrain the model.")
-
-    def _latest_features(self, ohlcv: pd.DataFrame, columns: list[str], last_open: pd.Timestamp) -> np.ndarray:
-        frame = build_features(ohlcv.iloc[-FEATURE_HISTORY_ROWS:], self._interval, self._feature_config)
-        missing_columns = [c for c in columns if c not in frame.columns]
-        if missing_columns:
-            raise ModelIncompatibleError(f"Features missing from pipeline: {', '.join(missing_columns)}")
-
-        last = frame.iloc[-1]
-        if last["timestamp"] != last_open:
-            raise DataNotAvailableError("Feature frame is not aligned with the latest candle.")
-        values = last[columns].to_numpy(dtype="float64")
-        if not np.isfinite(values).all():
-            bad = [c for c, v in zip(columns, values) if not np.isfinite(v)]
-            raise DataNotAvailableError(
-                f"Not enough continuous recent data to compute features ({', '.join(bad[:5])}). "
-                "This happens right after gaps in exchange data."
-            )
-        return values.reshape(1, -1)
 
     def _load_model(self, model_id: str) -> QuantileModel:
         with self._lock:

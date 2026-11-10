@@ -1,33 +1,33 @@
 {
   "symbol": "BTCUSDT",
-  "updated_at": "2026-11-10T19:05:29.173092+00:00",
-  "uptime_minutes": 9.0,
+  "updated_at": "2026-11-10T19:18:30.462996+00:00",
+  "uptime_minutes": 22.0,
   "connections": {
     "spot": {
       "connected": true,
-      "messages": 5514,
-      "seconds_since_last_message": 0.1
+      "messages": 12770,
+      "seconds_since_last_message": 0.4
     },
     "futures_market": {
       "connected": true,
-      "messages": 6978,
-      "seconds_since_last_message": 0.2
+      "messages": 16416,
+      "seconds_since_last_message": 0.3
     },
     "futures_public": {
       "connected": true,
-      "messages": 1070,
+      "messages": 2620,
       "seconds_since_last_message": 0.3
     }
   },
   "rows_written": {
-    "open_interest": 9,
+    "open_interest": 22,
     "connection_events": 3,
-    "book_spot": 8,
-    "mark_price": 8,
-    "book_futures": 8,
-    "trades_spot": 8,
-    "trades_futures": 8,
-    "liquidations": 1
+    "book_spot": 21,
+    "mark_price": 21,
+    "book_futures": 21,
+    "trades_spot": 21,
+    "trades_futures": 21,
+    "liquidations": 3
   },
   "parse_errors": 0
 }

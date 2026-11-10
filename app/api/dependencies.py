@@ -10,6 +10,8 @@ from app.data.storage import MarketDataStorage
 from app.ml.registry.model_registry import ModelRegistry
 from app.services.market_data_service import MarketDataService
 from app.services.prediction_service import PredictionService
+from app.services.signal_journal import SignalJournal
+from app.services.signal_service import SignalService
 
 
 def _resolve(path: Path) -> Path:
@@ -34,3 +36,9 @@ def get_market_data_service() -> MarketDataService:
 @lru_cache
 def get_prediction_service() -> PredictionService:
     return PredictionService(registry=get_registry(), market_data=get_market_data_service())
+
+
+@lru_cache
+def get_signal_service() -> SignalService:
+    journal = SignalJournal(_resolve(get_settings().data_dir) / "signals")
+    return SignalService(registry=get_registry(), market_data=get_market_data_service(), journal=journal)

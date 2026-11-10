@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import health, live, models, predictions
+from app.api.routes import health, live, models, predictions, signals
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
@@ -20,6 +20,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
+        allow_origin_regex=settings.cors_origin_regex,
         allow_methods=["GET"],
         allow_headers=["*"],
     )
@@ -37,6 +38,7 @@ def create_app() -> FastAPI:
     app.include_router(predictions.router)
     app.include_router(models.router)
     app.include_router(live.router)
+    app.include_router(signals.router)
     return app
 
 
