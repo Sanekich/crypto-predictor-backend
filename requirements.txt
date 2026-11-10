@@ -1,0 +1,24 @@
+
+# API
+fastapi
+uvicorn[standard]
+pydantic-settings
+
+# Data Processing
+numpy
+pandas
+scipy
+pyarrow
+
+# Machine Learning
+scikit-learn
+xgboost
+optuna
+
+# Utilities
+python-dotenv
+joblib
+
+# Testing
+pytest
+httpx
