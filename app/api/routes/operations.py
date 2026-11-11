@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import os
 import subprocess
 import sys
@@ -72,17 +73,27 @@ def _run(job_id: str, request: OperationRequest) -> None:
         )
 
 
-def _check_token(token: str | None) -> None:
+def _check_token(token: str | None, token_b64: str | None) -> None:
     expected = os.getenv("OPERATIONS_TOKEN")
     if not expected:
         raise HTTPException(status_code=503, detail="Operations are not configured. Set OPERATIONS_TOKEN on the backend.")
-    if token != expected:
+    decoded = token
+    if token_b64:
+        try:
+            decoded = base64.b64decode(token_b64, validate=True).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            raise HTTPException(status_code=401, detail="Invalid operations token") from None
+    if decoded != expected:
         raise HTTPException(status_code=401, detail="Invalid operations token")
 
 
 @router.post("/run", response_model=OperationSummary, status_code=202)
-def run_operation(request: OperationRequest, x_operations_token: str | None = Header(default=None)) -> OperationSummary:
-    _check_token(x_operations_token)
+def run_operation(
+    request: OperationRequest,
+    x_operations_token: str | None = Header(default=None),
+    x_operations_token_b64: str | None = Header(default=None),
+) -> OperationSummary:
+    _check_token(x_operations_token, x_operations_token_b64)
     with _lock:
         if any(job["status"] == "running" for job in _jobs.values()):
             raise HTTPException(status_code=409, detail="Another operation is already running")
