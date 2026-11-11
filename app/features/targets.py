@@ -31,3 +31,17 @@ def future_return(close: pd.Series, periods: int) -> pd.Series:
 def future_direction(future_ret: pd.Series) -> pd.Series:
     """1.0 if the future return is positive, 0.0 otherwise, NaN if unknown."""
     return (future_ret > 0).astype("float64").where(future_ret.notna())
+
+
+def future_direction_with_neutral(future_ret: pd.Series, neutral_return: float = 0.001) -> pd.Series:
+    """Return -1/0/1 for down/neutral/up moves beyond a minimum return.
+
+    This is intentionally opt-in: existing binary direction models continue to use
+    :func:`future_direction` until a dedicated multiclass trainer is introduced.
+    """
+    if neutral_return < 0:
+        raise ValueError("neutral_return must be non-negative")
+    result = pd.Series(0.0, index=future_ret.index)
+    result = result.mask(future_ret > neutral_return, 1.0)
+    result = result.mask(future_ret < -neutral_return, -1.0)
+    return result.where(future_ret.notna())
