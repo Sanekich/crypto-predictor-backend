@@ -252,6 +252,36 @@ python scripts/status_report.py
 ошибки парсинга и статусы моделей (`shadow`/`approved`). Она не обучает модели и не
 изменяет файлы.
 
+## Автоматический live-сбор и обучение
+
+Для запуска API вместе с live-сборщиком:
+
+```powershell
+python scripts/start_backend_with_collector.py
+```
+
+В Render этот supervisor запускается автоматически через `render.yaml`. Collector
+перезапускается, если процесс завершился. Для сохранения данных между перезапусками
+нужен постоянный диск или внешнее хранилище; ephemeral-диск Render нельзя считать
+долговременной обучающей выборкой.
+
+Проверка покрытия данных:
+
+```powershell
+python scripts/status_report.py
+```
+
+Обучение direction-моделей прямо сейчас:
+
+```powershell
+python scripts/train_direction_model.py --horizon 24h
+python scripts/train_direction_model.py --horizon 7d
+```
+
+После обучения проверь `accuracy`, `Brier score`, количество независимых сигналов,
+`hit rate` и статус `shadow`. Не заменяй старую модель без walk-forward и paper/shadow
+проверки на новых данных.
+
 ## Структура
 
 ```text
