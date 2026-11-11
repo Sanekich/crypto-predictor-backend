@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import data_status, health, live, models, predictions, signals
+from app.api.routes import data_status, health, live, models, operations, predictions, signals
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
@@ -39,6 +39,7 @@ def create_app() -> FastAPI:
     app.include_router(models.router)
     app.include_router(live.router)
     app.include_router(data_status.router)
+    app.include_router(operations.router)
     app.include_router(signals.router)
     return app
 

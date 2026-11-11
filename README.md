@@ -282,6 +282,13 @@ python scripts/train_direction_model.py --horizon 7d
 `hit rate` и статус `shadow`. Не заменяй старую модель без walk-forward и paper/shadow
 проверки на новых данных.
 
+### Управление из frontend
+
+Вкладка `#/tests` запускает только allow-listed операции: проверку данных, обучение
+direction-модели, walk-forward и regime-report. Для защиты тяжёлых процессов задай на
+backend секретную переменную `OPERATIONS_TOKEN`; этот же токен вводится в форме вкладки
+на время сессии и не сохраняется в браузере. Одновременно разрешён только один запуск.
+
 ## Структура
 
 ```text

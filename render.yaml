@@ -18,6 +18,8 @@ services:
         value: production
       - key: COLLECTOR_SYMBOL
         value: BTCUSDT
+      - key: OPERATIONS_TOKEN
+        sync: false
       - key: DEBUG
         value: "false"
       # Allows the frontend static site (and its preview deployments) to call the API
