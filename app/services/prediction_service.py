@@ -22,6 +22,8 @@ from app.core.exceptions import (
 )
 from app.data.intervals import interval_to_timedelta
 from app.features.feature_pipeline import FeatureConfig
+from app.ml.models.base import ReturnModel
+from app.ml.models.direction_model import DirectionModel
 from app.ml.models.quantile_model import QuantileModel
 from app.ml.registry.model_registry import ModelRegistry
 from app.schemas.prediction import (
@@ -37,7 +39,7 @@ from app.services.market_data_service import MarketDataService
 logger = logging.getLogger(__name__)
 
 RANGE_MODEL_TYPE = "xgboost_quantile"
-RETURN_MODEL_TYPE = "xgboost"
+DIRECTION_MODEL_TYPE = "xgboost_direction"
 
 ASSET_NAMES = {"BTCUSDT": "Bitcoin", "ETHUSDT": "Ethereum", "SOLUSDT": "Solana"}
 
@@ -63,7 +65,7 @@ class PredictionService:
         self._clock = clock
         self._max_staleness = interval_to_timedelta(interval) * max_staleness_intervals
         self._feature_config = FeatureConfig()
-        self._models: dict[str, QuantileModel] = {}
+        self._models: dict[str, ReturnModel] = {}
         self._predictions: dict[tuple[str, pd.Timestamp], PredictionResponse] = {}
         self._lock = threading.Lock()
 
@@ -134,7 +136,7 @@ class PredictionService:
                 lower_price=current_price * (1 + float(lower)),
                 upper_price=current_price * (1 + float(upper)),
             ),
-            direction=self._direction(symbol, horizon),
+            direction=self._direction(symbol, horizon, ohlcv),
             quality=self._quality(meta),
         )
         with self._lock:
@@ -157,15 +159,38 @@ class PredictionService:
             logger.info("Loaded model %s", model_id)
         return model
 
-    def _direction(self, symbol: str, horizon: str) -> DirectionForecast:
-        meta = self._registry.latest(RETURN_MODEL_TYPE, symbol, self._interval, horizon)
+    def _load_direction_model(self, model_id: str) -> DirectionModel:
+        with self._lock:
+            model = self._models.get(model_id)
+        if model is None:
+            loaded, _ = self._registry.load(model_id)
+            if not isinstance(loaded, DirectionModel):
+                raise ModelIncompatibleError(f"Model {model_id} is not a direction model")
+            model = loaded
+            with self._lock:
+                self._models[model_id] = model
+            logger.info("Loaded direction model %s", model_id)
+        return model
+
+    def _direction(self, symbol: str, horizon: str, ohlcv: pd.DataFrame) -> DirectionForecast:
+        meta = self._registry.latest(DIRECTION_MODEL_TYPE, symbol, self._interval, horizon)
         if meta is None:
             return DirectionForecast(available=False, reason="NO_MODEL")
-        improvement = (meta.get("improvement_vs_best_baseline") or {}).get("validation_rmse")
-        if improvement is None or improvement <= 0:
-            return DirectionForecast(available=False, reason="NO_SIGNAL")
-        # A return model that beats baselines still has no calibrated probabilities
-        return DirectionForecast(available=False, reason="NOT_CALIBRATED")
+        check_compatibility(meta, self._feature_config)
+        features = latest_features(ohlcv, self._interval, meta["feature_columns"], self._feature_config)
+        model = self._load_direction_model(meta["model_id"])
+        p_up = float(model.predict_proba_up(features)[0])
+        confidence = max(p_up, 1 - p_up)
+        status = meta.get("status", "shadow")
+        return DirectionForecast(
+            available=True,
+            up_probability=p_up,
+            direction="up" if p_up >= 0.5 else "down",
+            confidence=confidence,
+            status=status,
+            model_version=meta["model_id"],
+            reason=None if status == "approved" else "SHADOW",
+        )
 
     @staticmethod
     def _quality(meta: dict[str, Any]) -> ModelQuality:

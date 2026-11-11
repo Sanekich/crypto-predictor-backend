@@ -17,12 +17,15 @@ class PriceRange(BaseModel):
 
 
 class DirectionForecast(BaseModel):
-    """Direction is only reported when a model beats the baselines and its
-    probabilities are calibrated. Otherwise available=False with a reason code."""
+    """Calibrated direction forecast for the requested horizon."""
 
     available: bool
     up_probability: float | None = None
-    reason: str | None = Field(default=None, description="NO_SIGNAL | NO_MODEL")
+    direction: str | None = Field(default=None, description="up or down")
+    confidence: float | None = None
+    status: str | None = Field(default=None, description="approved or shadow")
+    model_version: str | None = None
+    reason: str | None = Field(default=None, description="NO_SIGNAL | NO_MODEL | SHADOW")
 
 
 class ModelQuality(BaseModel):

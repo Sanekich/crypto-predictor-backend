@@ -95,7 +95,7 @@ def test_prediction_is_cached_per_candle(env) -> None:
     assert service.predict("BTCUSDT", "24h") is service.predict("BTCUSDT", "24h")
 
 
-def test_direction_reports_no_signal_when_return_model_loses_to_baseline(env) -> None:
+def test_direction_reports_no_model_without_horizon_direction_model(env) -> None:
     from app.ml.models.baselines import ZeroReturnBaseline
 
     env["registry"].save(
@@ -115,7 +115,7 @@ def test_direction_reports_no_signal_when_return_model_loses_to_baseline(env) ->
     meta["model_type"] = "xgboost"
     meta_path.write_text(json.dumps(meta), encoding="utf-8")
 
-    assert env["service"].predict("BTCUSDT", "24h").direction.reason == "NO_SIGNAL"
+    assert env["service"].predict("BTCUSDT", "24h").direction.reason == "NO_MODEL"
 
 
 def test_unknown_horizon_raises(env) -> None:

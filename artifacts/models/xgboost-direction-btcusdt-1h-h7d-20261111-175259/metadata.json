@@ -1,0 +1,256 @@
+{
+  "model_id": "xgboost-direction-btcusdt-1h-h7d-20261111-175259",
+  "model_type": "xgboost_direction",
+  "trained_at": "2026-11-11T17:52:59.211550+00:00",
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "horizon": "7d",
+  "horizon_periods": 168,
+  "target": "target_direction_7d",
+  "status": "shadow",
+  "signal_threshold": 0.75,
+  "gate": {
+    "passed": false,
+    "threshold": 0.75,
+    "criteria": {
+      "min_independent_signals": 77,
+      "min_hit_rate": 0.75,
+      "min_hit_rate_lower_95": 0.7
+    },
+    "reasons": [
+      "only 9 independent signals >= 75% (need 77)",
+      "hit rate 55.6% below 75%",
+      "95% lower bound 26.7% below 70%"
+    ]
+  },
+  "feature_columns": [
+    "log_return_1",
+    "log_return_3",
+    "log_return_6",
+    "log_return_12",
+    "log_return_24",
+    "log_return_72",
+    "log_return_168",
+    "close_to_sma_24",
+    "close_to_sma_72",
+    "close_to_sma_168",
+    "sma_24_change_24",
+    "close_to_ema_12",
+    "ema_12_to_ema_26",
+    "rsi_14",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "volatility_24",
+    "volatility_168",
+    "volatility_ratio_24_168",
+    "candle_range_pct",
+    "atr_14_pct",
+    "volume_change_1",
+    "volume_ratio_24",
+    "volume_ratio_168",
+    "volume_zscore_168",
+    "taker_buy_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "feature_pipeline_version": "1.0",
+  "feature_config": {
+    "return_windows": [
+      1,
+      3,
+      6,
+      12,
+      24,
+      72,
+      168
+    ],
+    "sma_windows": [
+      24,
+      72,
+      168
+    ],
+    "sma_change_window": 24,
+    "ema_fast": 12,
+    "ema_slow": 26,
+    "macd_signal": 9,
+    "rsi_window": 14,
+    "atr_window": 14,
+    "volatility_windows": [
+      24,
+      168
+    ],
+    "volume_windows": [
+      24,
+      168
+    ],
+    "time_features": true
+  },
+  "params": {
+    "n_estimators": 2000,
+    "learning_rate": 0.02,
+    "max_depth": 3,
+    "min_child_weight": 100,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 5.0,
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "tree_method": "hist",
+    "early_stopping_rounds": 100,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_info": {
+    "best_iteration": 62,
+    "calibrated": true
+  },
+  "split": {
+    "gap": "7 days 00:00:00",
+    "train": {
+      "rows": 49213,
+      "start": "2017-08-24T04:00:00+00:00",
+      "end": "2023-10-16T18:00:00+00:00"
+    },
+    "validation": {
+      "rows": 15026,
+      "start": "2023-10-23T19:00:00+00:00",
+      "end": "2025-07-10T20:00:00+00:00"
+    },
+    "test": {
+      "rows": 11396,
+      "start": "2025-07-17T21:00:00+00:00",
+      "end": "2026-11-04T16:00:00+00:00"
+    },
+    "early_stopping": {
+      "rows": 7513,
+      "start": "2023-10-23T19:00:00+00:00",
+      "end": "2024-08-31T19:00:00+00:00"
+    },
+    "calibration": {
+      "rows": 7345,
+      "start": "2024-09-07T20:00:00+00:00",
+      "end": "2025-07-10T20:00:00+00:00"
+    }
+  },
+  "metrics": {
+    "calibration": {
+      "n": 7345,
+      "base_rate_up": 0.6243703199455412,
+      "accuracy": 0.6243703199455412,
+      "always_up_accuracy": 0.6243703199455412,
+      "brier": 0.2329695858200126,
+      "brier_base_rate": 0.2345320235166437,
+      "log_loss": 0.6585073341780593,
+      "log_loss_base_rate": 0.6618840491934438,
+      "max_confidence": 0.8055559992790222,
+      "signals": {
+        "0.60": {
+          "signals": 4789,
+          "share_of_time": 0.6520081688223281,
+          "hit_rate": 0.6404259761954479,
+          "independent_signals": 43,
+          "independent_hit_rate": 0.6976744186046512,
+          "hit_rate_lower_95": 0.5489435424759018
+        },
+        "0.65": {
+          "signals": 1865,
+          "share_of_time": 0.2539142273655548,
+          "hit_rate": 0.6820375335120643,
+          "independent_signals": 29,
+          "independent_hit_rate": 0.6206896551724138,
+          "hit_rate_lower_95": 0.4400222620928496
+        },
+        "0.70": {
+          "signals": 294,
+          "share_of_time": 0.04002722940776038,
+          "hit_rate": 0.7108843537414966,
+          "independent_signals": 12,
+          "independent_hit_rate": 0.6666666666666666,
+          "hit_rate_lower_95": 0.3906175873976139
+        },
+        "0.75": {
+          "signals": 45,
+          "share_of_time": 0.006126616746085773,
+          "hit_rate": 1.0,
+          "independent_signals": 1,
+          "independent_hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294
+        },
+        "0.80": {
+          "signals": 3,
+          "share_of_time": 0.0004084411164057182,
+          "hit_rate": 1.0,
+          "independent_signals": 1,
+          "independent_hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294
+        }
+      }
+    },
+    "test": {
+      "n": 11396,
+      "base_rate_up": 0.4546332046332046,
+      "accuracy": 0.4546332046332046,
+      "always_up_accuracy": 0.5453667953667953,
+      "brier": 0.2795595830342555,
+      "brier_base_rate": 0.24794185387814727,
+      "log_loss": 0.7548402311104809,
+      "log_loss_base_rate": 0.689025221680942,
+      "max_confidence": 0.8122623562812805,
+      "signals": {
+        "0.60": {
+          "signals": 8831,
+          "share_of_time": 0.7749210249210249,
+          "hit_rate": 0.4490997622013362,
+          "independent_signals": 67,
+          "independent_hit_rate": 0.44776119402985076,
+          "hit_rate_lower_95": 0.33476201784797566
+        },
+        "0.65": {
+          "signals": 4097,
+          "share_of_time": 0.3595121095121095,
+          "hit_rate": 0.4679033439101782,
+          "independent_signals": 52,
+          "independent_hit_rate": 0.4423076923076923,
+          "hit_rate_lower_95": 0.3159484718858809
+        },
+        "0.70": {
+          "signals": 757,
+          "share_of_time": 0.06642681642681643,
+          "hit_rate": 0.5217965653896962,
+          "independent_signals": 23,
+          "independent_hit_rate": 0.5217391304347826,
+          "hit_rate_lower_95": 0.32962429864218495
+        },
+        "0.75": {
+          "signals": 113,
+          "share_of_time": 0.009915759915759915,
+          "hit_rate": 0.7876106194690266,
+          "independent_signals": 9,
+          "independent_hit_rate": 0.5555555555555556,
+          "hit_rate_lower_95": 0.26664734574402965
+        },
+        "0.80": {
+          "signals": 26,
+          "share_of_time": 0.0022815022815022815,
+          "hit_rate": 0.7307692307692307,
+          "independent_signals": 1,
+          "independent_hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294
+        }
+      }
+    }
+  },
+  "code_version": {
+    "commit": "178e8136e854f39fb71137d807c40bb2c5ff71bb",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.12.3",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1"
+  }
+}
