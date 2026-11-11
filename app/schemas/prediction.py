@@ -69,3 +69,4 @@ class ModelSummary(BaseModel):
     interval: str
     horizon: str
     trained_at: datetime
+    status: str | None = None
