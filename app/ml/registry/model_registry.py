@@ -21,6 +21,7 @@ from typing import Any
 from app.ml.models.base import ReturnModel
 from app.ml.models.baselines import HistoricalMeanBaseline, RidgeBaseline, ZeroReturnBaseline
 from app.ml.models.direction_model import XGBoostDirectionModel
+from app.ml.models.neutral_direction_model import XGBoostNeutralDirectionModel
 from app.ml.models.quantile_model import HistoricalQuantileBaseline, XGBoostQuantileModel
 from app.ml.models.xgboost_model import XGBoostReturnModel
 
@@ -34,6 +35,7 @@ MODEL_TYPES: dict[str, type[ReturnModel]] = {
         XGBoostQuantileModel,
         HistoricalQuantileBaseline,
         XGBoostDirectionModel,
+        XGBoostNeutralDirectionModel,
     )
 }
 

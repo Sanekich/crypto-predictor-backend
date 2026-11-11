@@ -179,6 +179,16 @@ python scripts/walk_forward_report.py --horizon 7d
 Также в `app/features/targets.py` добавлена опциональная разметка `down / neutral / up` для
 будущего multiclass-обучения; текущие бинарные модели от неё не меняются.
 
+Экспериментальный trainer для этой разметки:
+
+```powershell
+python scripts/train_neutral_direction_model.py --horizon 24h --no-save
+python scripts/train_neutral_direction_model.py --horizon 7d --no-save
+```
+
+Он не заменяет текущие модели и не подключён к API, пока neutral-класс и качество
+ненейтральных сигналов не будут подтверждены на walk-forward-периодах.
+
 ## API
 
 | Метод | Адрес | Что возвращает |
