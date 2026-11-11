@@ -15,6 +15,7 @@ from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from app.core.exceptions import NotFoundError
+from app.core.config import get_settings
 
 router = APIRouter(prefix="/operations", tags=["operations"])
 _jobs: dict[str, dict[str, Any]] = {}
@@ -74,7 +75,7 @@ def _run(job_id: str, request: OperationRequest) -> None:
 
 
 def _check_token(token: str | None, token_b64: str | None) -> None:
-    expected = os.getenv("OPERATIONS_TOKEN")
+    expected = get_settings().operations_token or os.getenv("OPERATIONS_TOKEN")
     if not expected:
         raise HTTPException(status_code=503, detail="Operations are not configured. Set OPERATIONS_TOKEN on the backend.")
     decoded = token

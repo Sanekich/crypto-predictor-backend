@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     data_dir: Path = Path("data")
     model_artifacts_dir: Path = Path("artifacts")
+    operations_token: str | None = None
 
 
 @lru_cache
