@@ -1,6 +1,5 @@
 """Feature vector of the latest closed candle, shared by all inference services."""
 
-import json
 from typing import Any
 
 import numpy as np
@@ -13,11 +12,6 @@ from app.features.feature_pipeline import FEATURE_PIPELINE_VERSION, FeatureConfi
 FEATURE_HISTORY_ROWS = 2000
 
 
-def _normalized(value: Any) -> Any:
-    """Compare configs the way they are stored in JSON (tuples become lists)."""
-    return json.loads(json.dumps(value))
-
-
 def check_compatibility(meta: dict[str, Any], config: FeatureConfig) -> None:
     """A model may only be used with the feature pipeline it was trained with."""
     if meta.get("feature_pipeline_version") != FEATURE_PIPELINE_VERSION:
@@ -25,7 +19,16 @@ def check_compatibility(meta: dict[str, Any], config: FeatureConfig) -> None:
             f"Model {meta['model_id']} was trained with feature pipeline "
             f"{meta.get('feature_pipeline_version')}, current is {FEATURE_PIPELINE_VERSION}. Retrain the model."
         )
-    if meta.get("feature_config") != _normalized(config.to_dict()):
+    try:
+        stored = FeatureConfig.from_dict(meta.get("feature_config") or {})
+    except (TypeError, ValueError):
+        raise ModelIncompatibleError(f"Model {meta['model_id']} has an unreadable feature configuration.") from None
+    if stored.derivatives:
+        raise ModelIncompatibleError(
+            f"Model {meta['model_id']} needs derivatives features ({', '.join(stored.derivatives)}), "
+            "which the API does not compute at inference yet. Use it for offline comparison only."
+        )
+    if stored != config:
         raise ModelIncompatibleError(f"Model {meta['model_id']} uses a different feature configuration. Retrain the model.")
 
 

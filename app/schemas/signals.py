@@ -29,7 +29,11 @@ class HorizonSignal(BaseModel):
     p_up: float = Field(description="Calibrated probability that the price is higher at target_time")
     direction: Literal["up", "down"]
     confidence: float = Field(description="max(p_up, 1 - p_up)")
-    is_signal: bool = Field(description="confidence >= requested threshold")
+    is_signal: bool = Field(description="confidence >= requested threshold and the model has walk-forward skill")
+    has_skill: bool = Field(default=False, description="beats the base rate on most walk-forward folds")
+    walk_forward_skill: float | None = Field(default=None, description="mean Brier skill vs base rate")
+    walk_forward_positive_folds: int | None = None
+    walk_forward_folds: int | None = None
     target_time: datetime
     quality: SignalModelQuality
 

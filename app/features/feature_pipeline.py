@@ -17,8 +17,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from app.data.intervals import interval_to_timedelta
 from app.data.processing.resampling import reindex_to_grid
 from app.features import returns, technical_indicators as ti, volatility, volume
+from app.features.derivatives import GROUPS as DERIVATIVE_GROUPS, build_derivative_features
 from app.features.targets import future_direction, future_return, horizon_to_periods
 
 FEATURE_PIPELINE_VERSION = "1.0"
@@ -39,15 +41,36 @@ class FeatureConfig:
     volatility_windows: tuple[int, ...] = (24, 168)
     volume_windows: tuple[int, ...] = (24, 168)
     time_features: bool = True
+    # Optional derivatives feature groups (stages 2-3): funding, basis, open_interest, dvol.
+    # Empty for the production models: they need only candles at inference.
+    derivatives: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        unknown = set(self.derivatives) - set(DERIVATIVE_GROUPS)
+        if unknown:
+            raise ValueError(f"unknown derivatives groups: {sorted(unknown)}")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
+    @classmethod
+    def from_dict(cls, values: dict[str, Any]) -> "FeatureConfig":
+        """Rebuild a config stored in model metadata (lists -> tuples, missing keys -> defaults)."""
+        known = cls.__dataclass_fields__
+        kwargs = {k: tuple(v) if isinstance(v, list) else v for k, v in values.items() if k in known}
+        return cls(**kwargs)
 
-def build_features(ohlcv: pd.DataFrame, interval: str, config: FeatureConfig | None = None) -> pd.DataFrame:
+
+def build_features(
+    ohlcv: pd.DataFrame,
+    interval: str,
+    config: FeatureConfig | None = None,
+    derivatives_data: dict[str, pd.DataFrame] | None = None,
+) -> pd.DataFrame:
     """Return a frame with `timestamp`, `close` and feature columns on a regular grid.
 
     Rows for missing candles (and rows whose windows touch them) contain NaN.
+    `derivatives_data` (DerivativesStore.load_all) is required if config.derivatives is set.
     """
     config = config or FeatureConfig()
     df = reindex_to_grid(ohlcv, interval)
@@ -108,7 +131,14 @@ def build_features(ohlcv: pd.DataFrame, interval: str, config: FeatureConfig | N
             f[name] = f[name].where(close.notna())
 
     features = pd.DataFrame(f).replace([np.inf, -np.inf], np.nan)
-    return pd.concat([df[["timestamp", "close"]], features], axis=1)
+    parts = [df[["timestamp", "close"]], features]
+    if config.derivatives:
+        parts.append(
+            build_derivative_features(
+                df[["timestamp", "close"]], derivatives_data or {}, config.derivatives, interval_to_timedelta(interval)
+            )
+        )
+    return pd.concat(parts, axis=1)
 
 
 def feature_columns(frame: pd.DataFrame) -> list[str]:
@@ -153,6 +183,7 @@ def build_dataset(
     interval: str,
     horizon: str,
     config: FeatureConfig | None = None,
+    derivatives_data: dict[str, pd.DataFrame] | None = None,
 ) -> FeatureDataset:
     """Features + targets for training. Rows with any missing feature or target are dropped.
 
@@ -161,7 +192,7 @@ def build_dataset(
     """
     config = config or FeatureConfig()
     periods = horizon_to_periods(horizon, interval)
-    frame = build_features(ohlcv, interval, config)
+    frame = build_features(ohlcv, interval, config, derivatives_data)
     columns = feature_columns(frame)
 
     target_return = f"target_return_{horizon}"

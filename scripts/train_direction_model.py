@@ -26,7 +26,7 @@ from app.data.intervals import INTERVAL_MS, interval_to_timedelta  # noqa: E402
 from app.data.storage import MarketDataStorage  # noqa: E402
 from app.features.feature_pipeline import FEATURE_PIPELINE_VERSION, build_dataset  # noqa: E402
 from app.ml.registry.model_registry import ModelRegistry, make_model_id  # noqa: E402
-from app.ml.training.train_direction import SIGNAL_THRESHOLD, train_direction_model  # noqa: E402
+from app.ml.training.train_direction import SIGNAL_THRESHOLD, train_direction_model, walk_forward_skill  # noqa: E402
 
 
 def pct(value: float | None) -> str:
@@ -60,6 +60,11 @@ def main(argv: list[str] | None = None) -> int:
         dataset.frame, dataset.feature_columns, dataset.target_direction_column, dataset.horizon_periods, gap
     )
 
+    print("Walk-forward (5 folds)...", flush=True)
+    skill = walk_forward_skill(
+        dataset.frame, dataset.feature_columns, dataset.target_direction_column, dataset.horizon_periods
+    )
+
     test = result.metrics["test"]
     print()
     for name in ("train", "early_stopping", "calibration", "test"):
@@ -80,6 +85,9 @@ def main(argv: list[str] | None = None) -> int:
             f" {s['independent_signals']:>12} {pct(s['independent_hit_rate'])} {pct(s['hit_rate_lower_95']):>10}"
         )
     print()
+    folds = ", ".join(f"{s:+.3f}" for s in skill["brier_skill_by_fold"])
+    print(f"Walk-forward skill   : {skill['brier_skill_mean']:+.4f}  [{folds}]  positive {skill['positive_folds']}/{skill['folds']}")
+    print(f"Direction shown      : {'YES (beats base rate on most folds)' if skill['has_skill'] else 'NO (no stable skill)'}")
     print(f"Status: {result.status.upper()}")
     for reason in result.gate["reasons"]:
         print(f"  - {reason}")
@@ -100,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         "status": result.status,
         "signal_threshold": SIGNAL_THRESHOLD,
         "gate": result.gate,
+        "walk_forward": skill,
         "feature_columns": dataset.feature_columns,
         "feature_pipeline_version": FEATURE_PIPELINE_VERSION,
         "feature_config": dataset.config.to_dict(),

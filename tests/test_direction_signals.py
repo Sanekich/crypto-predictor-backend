@@ -101,7 +101,9 @@ def test_direction_model_roundtrip(tmp_path) -> None:
 # --- service ----------------------------------------------------------------------
 
 
-def save_direction_model(registry: ModelRegistry, ohlcv: pd.DataFrame, horizon: str, threshold: float, status: str) -> None:
+def save_direction_model(
+    registry: ModelRegistry, ohlcv: pd.DataFrame, horizon: str, threshold: float, status: str, has_skill: bool = True
+) -> None:
     dataset = build_dataset(ohlcv, "1h", horizon)
     X = dataset.frame[dataset.feature_columns].to_numpy()
     y = dataset.frame[dataset.target_direction_column].to_numpy()
@@ -118,6 +120,7 @@ def save_direction_model(registry: ModelRegistry, ohlcv: pd.DataFrame, horizon: 
             "status": status,
             "signal_threshold": threshold,
             "gate": {"reasons": [] if status == "approved" else ["only 0 independent signals"]},
+            "walk_forward": {"has_skill": has_skill, "folds": 5, "positive_folds": 5 if has_skill else 1, "brier_skill_mean": 0.01 if has_skill else -0.02},
             "feature_columns": dataset.feature_columns,
             "feature_pipeline_version": FEATURE_PIPELINE_VERSION,
             "feature_config": json.loads(json.dumps(FeatureConfig().to_dict())),
@@ -201,3 +204,33 @@ def test_signals_api(signal_env) -> None:
         assert client.get("/signals/BTCUSDT", params={"min_confidence": 0.3}).status_code == 422
     finally:
         app.dependency_overrides.clear()
+
+
+def test_no_signal_without_walk_forward_skill(tmp_path) -> None:
+    ohlcv = make_random_ohlcv(N, seed=3)
+    storage = MarketDataStorage(tmp_path / "data")
+    storage.save_processed(ohlcv, "binance", "BTCUSDT", "1h")
+    registry = ModelRegistry(tmp_path / "artifacts")
+    save_direction_model(registry, ohlcv, "4h", threshold=0.5, status="shadow", has_skill=False)
+    market = MarketDataService(storage, no_network, clock=lambda: FRESH_NOW)
+    service = SignalService(registry, market, SignalJournal(tmp_path / "signals"), clock=lambda: FRESH_NOW)
+
+    h = service.get_signals("BTCUSDT", threshold=0.5).horizons[0]
+    assert h.has_skill is False and h.walk_forward_positive_folds == 1
+    assert h.is_signal is False  # even at threshold 0.5: no skill -> never a signal
+
+
+def test_prediction_direction_hidden_without_skill(tmp_path) -> None:
+    from app.services.prediction_service import PredictionService
+    from tests.test_prediction_service import save_model
+
+    ohlcv = make_random_ohlcv(N, seed=3)
+    storage = MarketDataStorage(tmp_path / "data")
+    storage.save_processed(ohlcv, "binance", "BTCUSDT", "1h")
+    registry = ModelRegistry(tmp_path / "artifacts")
+    save_model(registry, ohlcv, horizon="24h")
+    market = MarketDataService(storage, no_network, clock=lambda: FRESH_NOW)
+
+    save_direction_model(registry, ohlcv, "24h", threshold=0.75, status="shadow", has_skill=False)
+    direction = PredictionService(registry, market, clock=lambda: FRESH_NOW).predict("BTCUSDT", "24h").direction
+    assert direction.available is False and direction.reason == "NO_SIGNAL"

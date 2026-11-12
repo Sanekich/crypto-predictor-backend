@@ -8,8 +8,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from app.ml.evaluation.metrics import direction_metrics, independent_sample_indices
+from app.ml.evaluation.metrics import direction_metrics, independent_sample_indices, interval_metrics
 from app.ml.models.direction_model import XGBoostDirectionModel
+from app.ml.models.quantile_model import HistoricalQuantileBaseline, XGBoostQuantileModel
 
 
 @dataclass(frozen=True)
@@ -52,7 +53,8 @@ def expanding_folds(
             WalkForwardFold(
                 train=np.arange(0, train_end),
                 early_stopping=np.arange(validation_start, early_end),
-                calibration=np.arange(calibration_start, test_start),
+                # ends one horizon before the test: calibration targets must not overlap test prices
+                calibration=np.arange(calibration_start, validation_end),
                 test=np.arange(test_start, test_end),
             )
         )
@@ -75,10 +77,8 @@ def evaluate_direction_walk_forward(
     for number, split in enumerate(expanding_folds(frame["timestamp"], horizon_periods, folds), start=1):
         model = XGBoostDirectionModel()
         model.fit(X[split.train], y[split.train], X[split.early_stopping], y[split.early_stopping])
-        calibration_indices = independent_sample_indices(split.calibration, horizon_periods)
-        model.calibrate(X[calibration_indices], y[calibration_indices])
-        if horizon_periods >= 24 * 7:
-            model.set_probability_shrinkage(0.35)
+        # Same procedure as production training (train_direction.py)
+        model.calibrate(X[split.calibration], y[split.calibration])
         probabilities = model.predict_proba_up(X[split.test])
         metrics = direction_metrics(y[split.test], probabilities, horizon_periods)
         independent_test = independent_sample_indices(split.test, horizon_periods)
@@ -86,6 +86,33 @@ def evaluate_direction_walk_forward(
         metrics["independent_n"] = int(len(independent_test))
         metrics["independent_accuracy"] = independent_metrics["accuracy"]
         metrics["independent_brier"] = independent_metrics["brier"]
+        metrics["fold"] = number
+        metrics["test_start"] = frame["timestamp"].iloc[split.test[0]].isoformat()
+        metrics["test_end"] = frame["timestamp"].iloc[split.test[-1]].isoformat()
+        results.append(metrics)
+    return results
+
+
+def evaluate_range_walk_forward(
+    frame: pd.DataFrame,
+    feature_columns: list[str],
+    target_column: str,
+    horizon_periods: int,
+    folds: int = 4,
+) -> list[dict[str, Any]]:
+    """Range (quantile) model vs a constant historical range on each expanding fold."""
+    frame = frame.sort_values("timestamp").reset_index(drop=True)
+    X = frame[feature_columns].to_numpy(dtype="float64")
+    y = frame[target_column].to_numpy(dtype="float64")
+    results: list[dict[str, Any]] = []
+
+    for number, split in enumerate(expanding_folds(frame["timestamp"], horizon_periods, folds), start=1):
+        validation = np.concatenate([split.early_stopping, split.calibration])
+        model = XGBoostQuantileModel().fit(X[split.train], y[split.train], X[validation], y[validation])
+        baseline = HistoricalQuantileBaseline().fit(X[split.train], y[split.train])
+        metrics = interval_metrics(y[split.test], model.predict_quantiles(X[split.test]), model.quantiles)
+        base = interval_metrics(y[split.test], baseline.predict_quantiles(X[split.test]), baseline.quantiles)
+        metrics["pinball_skill_vs_constant"] = 1 - metrics["pinball_mean"] / base["pinball_mean"]
         metrics["fold"] = number
         metrics["test_start"] = frame["timestamp"].iloc[split.test[0]].isoformat()
         metrics["test_end"] = frame["timestamp"].iloc[split.test[-1]].isoformat()

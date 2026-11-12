@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import hmac
 import os
 import subprocess
 import sys
@@ -84,7 +85,7 @@ def _check_token(token: str | None, token_b64: str | None) -> None:
             decoded = base64.b64decode(token_b64, validate=True).decode("utf-8")
         except (ValueError, UnicodeDecodeError):
             raise HTTPException(status_code=401, detail="Invalid operations token") from None
-    if decoded != expected:
+    if decoded is None or not hmac.compare_digest(decoded.encode("utf-8"), expected.encode("utf-8")):
         raise HTTPException(status_code=401, detail="Invalid operations token")
 
 
@@ -114,13 +115,23 @@ def run_operation(
 
 
 @router.get("/status", response_model=list[OperationSummary])
-def operation_status() -> list[OperationSummary]:
+def operation_status(
+    x_operations_token: str | None = Header(default=None),
+    x_operations_token_b64: str | None = Header(default=None),
+) -> list[OperationSummary]:
+    """Job log (script output may reveal internals, so it is token-protected)."""
+    _check_token(x_operations_token, x_operations_token_b64)
     with _lock:
         return [OperationSummary(**job) for job in reversed(list(_jobs.values()))]
 
 
 @router.get("/status/{job_id}", response_model=OperationSummary)
-def operation_detail(job_id: str) -> OperationSummary:
+def operation_detail(
+    job_id: str,
+    x_operations_token: str | None = Header(default=None),
+    x_operations_token_b64: str | None = Header(default=None),
+) -> OperationSummary:
+    _check_token(x_operations_token, x_operations_token_b64)
     with _lock:
         job = _jobs.get(job_id)
     if job is None:

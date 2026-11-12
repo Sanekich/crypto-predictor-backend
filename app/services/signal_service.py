@@ -103,6 +103,7 @@ class SignalService:
             if columns not in features_cache:
                 features_cache[columns] = latest_features(ohlcv, self._interval, list(columns), self._feature_config)
             p_up = float(self._load(meta["model_id"]).predict_proba_up(features_cache[columns])[0])
+            skill = meta.get("walk_forward") or {}
             confidence = max(p_up, 1 - p_up)
             direction = "up" if p_up >= 0.5 else "down"
             target_time = data_as_of + step * meta["horizon_periods"]
@@ -134,7 +135,11 @@ class SignalService:
                     p_up=p_up,
                     direction=direction,
                     confidence=confidence,
-                    is_signal=confidence >= threshold,
+                    is_signal=confidence >= threshold and bool(skill.get("has_skill")),
+                    has_skill=bool(skill.get("has_skill")),
+                    walk_forward_skill=skill.get("brier_skill_mean"),
+                    walk_forward_positive_folds=skill.get("positive_folds"),
+                    walk_forward_folds=skill.get("folds"),
                     target_time=target_time.to_pydatetime(),
                     quality=self._quality(meta, model_threshold),
                 )

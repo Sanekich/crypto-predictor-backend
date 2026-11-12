@@ -176,6 +176,11 @@ class PredictionService:
         meta = self._registry.latest(DIRECTION_MODEL_TYPE, symbol, self._interval, horizon)
         if meta is None:
             return DirectionForecast(available=False, reason="NO_MODEL")
+        if not (meta.get("walk_forward") or {}).get("has_skill"):
+            # No stable walk-forward skill (or not verified yet): a probability would be noise
+            return DirectionForecast(
+                available=False, reason="NO_SIGNAL", status=meta.get("status", "shadow"), model_version=meta["model_id"]
+            )
         check_compatibility(meta, self._feature_config)
         features = latest_features(ohlcv, self._interval, meta["feature_columns"], self._feature_config)
         model = self._load_direction_model(meta["model_id"])

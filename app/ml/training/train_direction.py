@@ -18,14 +18,19 @@ import numpy as np
 import pandas as pd
 
 from app.ml.evaluation.metrics import direction_metrics
-from app.ml.evaluation.metrics import independent_sample_indices
 from app.ml.evaluation.splits import TimeSplit, chronological_split
+from app.ml.evaluation.walk_forward import evaluate_direction_walk_forward
 from app.ml.models.direction_model import XGBoostDirectionModel
 
 logger = logging.getLogger(__name__)
 
 SIGNAL_THRESHOLD = 0.75
-WEEKLY_PROBABILITY_SHRINKAGE = 0.35
+
+# Direction is shown at all only if the model beats the base rate (Brier score)
+# on most walk-forward folds. A hand-tuned probability shrinkage for 7d was tried
+# and removed: walk-forward showed negative skill on all folds with or without it,
+# i.e. it only reduced the damage of a model without signal.
+SKILL_GATE = {"folds": 5, "min_positive_folds": 4}
 
 # A model is "approved" (signals may be shown as reliable) only if, on the test
 # period, its high-confidence signals came true often enough and on enough
@@ -81,8 +86,9 @@ def train_direction_model(
     # Validation is divided into early stopping and calibration, with a gap between them
     half = len(split.validation) // 2
     early_stop = split.validation[:half]
+    # All rows are used: subsampling to independent rows left ~18 points for 7d and
+    # gave worse walk-forward skill for 24h; overlap does not bias a Platt fit.
     calibration = split.validation[half + horizon_periods :]
-    calibration = independent_sample_indices(calibration, horizon_periods)
     if len(early_stop) == 0 or len(calibration) == 0:
         raise ValueError("not enough validation data for early stopping and calibration")
 
@@ -92,8 +98,6 @@ def train_direction_model(
     model = XGBoostDirectionModel(params)
     model.fit(X[split.train], y[split.train], X[early_stop], y[early_stop])
     model.calibrate(X[calibration], y[calibration])
-    if horizon_periods >= 24 * 7:
-        model.set_probability_shrinkage(WEEKLY_PROBABILITY_SHRINKAGE)
 
     metrics = {
         "calibration": direction_metrics(y[calibration], model.predict_proba_up(X[calibration]), horizon_periods),
@@ -114,6 +118,28 @@ def train_direction_model(
         "approved" if gate["passed"] else "shadow",
     )
     return DirectionTrainingResult(model, split, split_info, metrics, gate)
+
+
+def walk_forward_skill(
+    frame: pd.DataFrame,
+    feature_columns: list[str],
+    target_column: str,
+    horizon_periods: int,
+    folds: int = SKILL_GATE["folds"],
+) -> dict[str, Any]:
+    """Brier skill vs the base rate on each expanding fold; has_skill decides if direction is shown."""
+    results = evaluate_direction_walk_forward(frame, feature_columns, target_column, horizon_periods, folds)
+    skills = [1 - r["brier"] / r["brier_base_rate"] for r in results]
+    positive = sum(s > 0 for s in skills)
+    return {
+        "folds": len(skills),
+        "brier_skill_by_fold": skills,
+        "brier_skill_mean": float(np.mean(skills)) if skills else None,
+        "positive_folds": positive,
+        "accuracy_by_fold": [r["accuracy"] for r in results],
+        "has_skill": bool(skills) and float(np.mean(skills)) > 0 and positive >= SKILL_GATE["min_positive_folds"],
+        "criteria": SKILL_GATE,
+    }
 
 
 def to_up_label(direction: pd.Series) -> np.ndarray:
