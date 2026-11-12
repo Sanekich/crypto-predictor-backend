@@ -18,12 +18,14 @@ import numpy as np
 import pandas as pd
 
 from app.ml.evaluation.metrics import direction_metrics
+from app.ml.evaluation.metrics import independent_sample_indices
 from app.ml.evaluation.splits import TimeSplit, chronological_split
 from app.ml.models.direction_model import XGBoostDirectionModel
 
 logger = logging.getLogger(__name__)
 
 SIGNAL_THRESHOLD = 0.75
+WEEKLY_PROBABILITY_SHRINKAGE = 0.35
 
 # A model is "approved" (signals may be shown as reliable) only if, on the test
 # period, its high-confidence signals came true often enough and on enough
@@ -80,6 +82,7 @@ def train_direction_model(
     half = len(split.validation) // 2
     early_stop = split.validation[:half]
     calibration = split.validation[half + horizon_periods :]
+    calibration = independent_sample_indices(calibration, horizon_periods)
     if len(early_stop) == 0 or len(calibration) == 0:
         raise ValueError("not enough validation data for early stopping and calibration")
 
@@ -89,6 +92,8 @@ def train_direction_model(
     model = XGBoostDirectionModel(params)
     model.fit(X[split.train], y[split.train], X[early_stop], y[early_stop])
     model.calibrate(X[calibration], y[calibration])
+    if horizon_periods >= 24 * 7:
+        model.set_probability_shrinkage(WEEKLY_PROBABILITY_SHRINKAGE)
 
     metrics = {
         "calibration": direction_metrics(y[calibration], model.predict_proba_up(X[calibration]), horizon_periods),

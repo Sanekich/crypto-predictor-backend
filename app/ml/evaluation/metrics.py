@@ -33,6 +33,14 @@ def independent_positions(positions: np.ndarray, spacing: int) -> np.ndarray:
     return np.asarray(kept, dtype=int)
 
 
+def independent_sample_indices(indices: np.ndarray, spacing: int) -> np.ndarray:
+    """Keep a regular, non-overlapping subset of row indices for calibration/evaluation."""
+    values = np.asarray(indices, dtype=int)
+    if spacing <= 1 or values.size <= 1:
+        return values
+    return values[::spacing]
+
+
 def direction_metrics(
     y_up: np.ndarray,
     p_up: np.ndarray,

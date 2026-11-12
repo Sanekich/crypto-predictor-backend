@@ -60,6 +60,7 @@ class XGBoostDirectionModel(DirectionModel):
         self._params = {**DEFAULT_DIRECTION_PARAMS, **(params or {})}
         self.model: XGBClassifier | None = None
         self.calibrator: LogisticRegression | None = None
+        self.probability_shrinkage = 1.0
 
     def fit(self, X_train, y_train, X_val=None, y_val=None) -> "XGBoostDirectionModel":
         """y is 1 for "up", 0 otherwise. Validation rows are used for early stopping only."""
@@ -80,6 +81,13 @@ class XGBoostDirectionModel(DirectionModel):
         self.calibrator.fit(_logit(self.raw_proba_up(X_cal)), np.asarray(y_cal, dtype=int))
         return self
 
+    def set_probability_shrinkage(self, factor: float) -> "XGBoostDirectionModel":
+        """Shrink calibrated probabilities toward 0.5 for unstable long horizons."""
+        if not 0.0 < factor <= 1.0:
+            raise ValueError("probability shrinkage must be in (0, 1]")
+        self.probability_shrinkage = float(factor)
+        return self
+
     def _require_model(self) -> XGBClassifier:
         if self.model is None:
             raise RuntimeError("model is not fitted")
@@ -92,14 +100,19 @@ class XGBoostDirectionModel(DirectionModel):
         raw = self.raw_proba_up(X)
         if self.calibrator is None:
             return raw
-        return self.calibrator.predict_proba(_logit(raw))[:, 1]
+        calibrated = self.calibrator.predict_proba(_logit(raw))[:, 1]
+        return 0.5 + self.probability_shrinkage * (calibrated - 0.5)
 
     def params(self) -> dict[str, Any]:
         return dict(self._params)
 
     def training_info(self) -> dict[str, Any]:
         best = getattr(self._require_model(), "best_iteration", None)
-        return {"best_iteration": int(best) if best is not None else None, "calibrated": self.calibrator is not None}
+        return {
+            "best_iteration": int(best) if best is not None else None,
+            "calibrated": self.calibrator is not None,
+            "probability_shrinkage": self.probability_shrinkage,
+        }
 
     def save(self, directory: Path) -> None:
         directory.mkdir(parents=True, exist_ok=True)
@@ -107,6 +120,7 @@ class XGBoostDirectionModel(DirectionModel):
         (directory / "params.json").write_text(json.dumps(self._params, indent=2), encoding="utf-8")
         if self.calibrator is not None:
             joblib.dump(self.calibrator, directory / "calibrator.joblib")
+        (directory / "probability_shrinkage.json").write_text(str(self.probability_shrinkage), encoding="utf-8")
 
     @classmethod
     def load(cls, directory: Path) -> "XGBoostDirectionModel":
@@ -116,4 +130,7 @@ class XGBoostDirectionModel(DirectionModel):
         calibrator_path = directory / "calibrator.joblib"
         if calibrator_path.exists():
             instance.calibrator = joblib.load(calibrator_path)
+        shrinkage_path = directory / "probability_shrinkage.json"
+        if shrinkage_path.exists():
+            instance.probability_shrinkage = float(shrinkage_path.read_text(encoding="utf-8"))
         return instance

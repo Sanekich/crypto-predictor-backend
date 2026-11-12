@@ -8,7 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from app.ml.evaluation.metrics import direction_metrics
+from app.ml.evaluation.metrics import direction_metrics, independent_sample_indices
 from app.ml.models.direction_model import XGBoostDirectionModel
 
 
@@ -75,9 +75,17 @@ def evaluate_direction_walk_forward(
     for number, split in enumerate(expanding_folds(frame["timestamp"], horizon_periods, folds), start=1):
         model = XGBoostDirectionModel()
         model.fit(X[split.train], y[split.train], X[split.early_stopping], y[split.early_stopping])
-        model.calibrate(X[split.calibration], y[split.calibration])
+        calibration_indices = independent_sample_indices(split.calibration, horizon_periods)
+        model.calibrate(X[calibration_indices], y[calibration_indices])
+        if horizon_periods >= 24 * 7:
+            model.set_probability_shrinkage(0.35)
         probabilities = model.predict_proba_up(X[split.test])
         metrics = direction_metrics(y[split.test], probabilities, horizon_periods)
+        independent_test = independent_sample_indices(split.test, horizon_periods)
+        independent_metrics = direction_metrics(y[independent_test], model.predict_proba_up(X[independent_test]), 1)
+        metrics["independent_n"] = int(len(independent_test))
+        metrics["independent_accuracy"] = independent_metrics["accuracy"]
+        metrics["independent_brier"] = independent_metrics["brier"]
         metrics["fold"] = number
         metrics["test_start"] = frame["timestamp"].iloc[split.test[0]].isoformat()
         metrics["test_end"] = frame["timestamp"].iloc[split.test[-1]].isoformat()
