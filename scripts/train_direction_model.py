@@ -66,7 +66,10 @@ def main(argv: list[str] | None = None) -> int:
         info = result.split_info[name]
         print(f"{name:<15}: {info['rows']:>6} rows  {info['start'][:10]} .. {info['end'][:10]}")
     print()
-    print(f"Test accuracy        : {test['accuracy']:.1%}   (always 'up': {test['always_up_accuracy']:.1%})")
+    print(f"Test accuracy        : {test['accuracy']:.1%}")
+    print(f"Always UP baseline   : {test['always_up_accuracy']:.1%}")
+    print(f"Always DOWN baseline : {test['always_down_accuracy']:.1%}")
+    print(f"Majority baseline    : {test['majority_baseline_accuracy']:.1%}")
     print(f"Brier score          : {test['brier']:.4f}  (base rate: {test['brier_base_rate']:.4f}, lower is better)")
     print(f"Max confidence (test): {test['max_confidence']:.1%}")
     print()

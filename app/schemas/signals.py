@@ -10,7 +10,9 @@ class SignalModelQuality(BaseModel):
     test_period_start: datetime
     test_period_end: datetime
     test_accuracy: float
-    always_up_accuracy: float = Field(description="Accuracy of always predicting the more common direction")
+    always_up_accuracy: float = Field(description="Accuracy of always predicting UP")
+    always_down_accuracy: float = Field(default=0.0, description="Accuracy of always predicting DOWN")
+    majority_baseline_accuracy: float = Field(default=0.0, description="Accuracy of always predicting the most common direction")
     max_confidence: float = Field(description="Highest calibrated confidence the model reached on the test period")
     signals_at_threshold: int = Field(description="Independent test signals at or above the signal threshold")
     hit_rate: float | None

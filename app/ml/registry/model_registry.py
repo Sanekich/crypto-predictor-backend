@@ -14,6 +14,7 @@ import json
 import math
 import os
 import re
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -103,7 +104,27 @@ class ModelRegistry:
         for directory in self.models_dir.iterdir():
             if (directory / "metadata.json").exists():
                 items.append(self.metadata(directory.name))
-        return sorted(items, key=lambda m: m.get("trained_at", ""), reverse=True)
+        items = sorted(items, key=lambda m: m.get("trained_at", ""), reverse=True)
+        latest_keys: set[tuple[Any, ...]] = set()
+        latest_ids: set[str] = set()
+        for meta in items:
+            key = (meta.get("model_type"), meta.get("symbol"), meta.get("interval"), meta.get("horizon"))
+            if key not in latest_keys:
+                latest_keys.add(key)
+                latest_ids.add(meta["model_id"])
+        return [{**meta, "is_latest": meta.get("model_id") in latest_ids} for meta in items]
+
+    def delete_old(self, model_id: str) -> None:
+        """Delete a historical artifact, never the latest or an approved model."""
+        meta = self.metadata(model_id)
+        if meta.get("status") == "approved":
+            raise ValueError("Approved models cannot be deleted")
+        if self.latest(meta.get("model_type", ""), meta.get("symbol", ""), meta.get("interval", ""), meta.get("horizon", "")):
+            latest = self.latest(meta["model_type"], meta["symbol"], meta["interval"], meta["horizon"])
+            if latest and latest.get("model_id") == model_id:
+                raise ValueError("The latest model version cannot be deleted")
+        directory = self._dir(model_id)
+        shutil.rmtree(directory)
 
     def latest(self, model_type: str, symbol: str, interval: str, horizon: str) -> dict[str, Any] | None:
         """Metadata of the most recently trained matching model, or None."""

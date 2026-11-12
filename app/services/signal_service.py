@@ -181,7 +181,12 @@ class SignalService:
             test_period_start=meta["split"]["test"]["start"],
             test_period_end=meta["split"]["test"]["end"],
             test_accuracy=test["accuracy"],
-            always_up_accuracy=test["always_up_accuracy"],
+            always_up_accuracy=test.get("always_up_accuracy", test.get("base_rate_up", 0.5)),
+            always_down_accuracy=test.get("always_down_accuracy", 1.0 - test.get("base_rate_up", 0.5)),
+            majority_baseline_accuracy=test.get(
+                "majority_baseline_accuracy",
+                max(test.get("base_rate_up", 0.5), 1.0 - test.get("base_rate_up", 0.5)),
+            ),
             max_confidence=test["max_confidence"],
             signals_at_threshold=stats.get("independent_signals", 0),
             hit_rate=stats.get("independent_hit_rate"),

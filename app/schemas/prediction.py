@@ -70,3 +70,4 @@ class ModelSummary(BaseModel):
     horizon: str
     trained_at: datetime
     status: str | None = None
+    is_latest: bool = False

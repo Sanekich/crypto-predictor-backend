@@ -107,9 +107,10 @@ def train_direction_model(
     split_info["calibration"] = {"rows": len(calibration), "start": ts.iloc[calibration[0]].isoformat(), "end": ts.iloc[calibration[-1]].isoformat()}
 
     logger.info(
-        "Direction model: test accuracy %.3f (always-up %.3f), status %s",
+        "Direction model: test accuracy %.3f (always-up %.3f, majority %.3f), status %s",
         metrics["test"]["accuracy"],
         metrics["test"]["always_up_accuracy"],
+        metrics["test"]["majority_baseline_accuracy"],
         "approved" if gate["passed"] else "shadow",
     )
     return DirectionTrainingResult(model, split, split_info, metrics, gate)
