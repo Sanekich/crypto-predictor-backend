@@ -184,10 +184,14 @@ python scripts/walk_forward_report.py --horizon 7d
 ```powershell
 python scripts/train_neutral_direction_model.py --horizon 24h --no-save
 python scripts/train_neutral_direction_model.py --horizon 7d --no-save
+python scripts/train_neutral_direction_model.py --horizon 7d --neutral-return 0.01 --no-save
 ```
 
-Он не заменяет текущие модели и не подключён к API, пока neutral-класс и качество
-ненейтральных сигналов не будут подтверждены на walk-forward-периодах.
+Для 7d эксперимент с `--neutral-return 0.01` означает: доходность выше +1% — `up`, ниже
+-1% — `down`, между ними — `neutral`. Trainer использует inverse-frequency class weights
+и выводит balanced accuracy, macro-F1 и confusion matrix, чтобы модель не игнорировала
+neutral-класс. Он не заменяет текущие модели и не подключён к API, пока качество всех
+трёх классов не будет подтверждено на независимых walk-forward-периодах.
 
 ### Качество по рыночным режимам
 

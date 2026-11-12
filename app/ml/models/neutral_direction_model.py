@@ -39,7 +39,7 @@ class XGBoostNeutralDirectionModel(ReturnModel):
         self._params = {**DEFAULT_PARAMS, **(params or {})}
         self.model: XGBClassifier | None = None
 
-    def fit(self, X_train, y_train, X_val=None, y_val=None) -> "XGBoostNeutralDirectionModel":
+    def fit(self, X_train, y_train, X_val=None, y_val=None, sample_weight=None) -> "XGBoostNeutralDirectionModel":
         params = dict(self._params)
         eval_set = None
         if X_val is None or y_val is None:
@@ -47,7 +47,7 @@ class XGBoostNeutralDirectionModel(ReturnModel):
         else:
             eval_set = [(X_val, y_val)]
         self.model = XGBClassifier(**params)
-        self.model.fit(X_train, y_train.astype("int64"), eval_set=eval_set, verbose=False)
+        self.model.fit(X_train, y_train.astype("int64"), sample_weight=sample_weight, eval_set=eval_set, verbose=False)
         return self
 
     def _require_model(self) -> XGBClassifier:

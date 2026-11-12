@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
+from sklearn.metrics import balanced_accuracy_score, confusion_matrix, f1_score
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -59,8 +60,13 @@ def main() -> int:
     X = frame[dataset.feature_columns].to_numpy(dtype="float64")
     y = frame["neutral_target"].to_numpy(dtype="int64")
 
+    train_y = y[split.train]
+    counts = np.bincount(train_y, minlength=3).astype(float)
+    class_weights = counts.sum() / np.maximum(counts, 1.0)
+    class_weights /= class_weights.mean()
+    sample_weight = class_weights[train_y]
     model = XGBoostNeutralDirectionModel()
-    model.fit(X[split.train], y[split.train], X[split.validation], y[split.validation])
+    model.fit(X[split.train], train_y, X[split.validation], y[split.validation], sample_weight=sample_weight)
     probabilities = model.predict_proba_classes(X[split.test])
     predicted = np.argmax(probabilities, axis=1)
     accuracy = float(np.mean(predicted == y[split.test]))
@@ -70,12 +76,18 @@ def main() -> int:
     confident_count = int(confident.sum())
     confident_accuracy = float(confident_correct.sum() / confident_count) if confident_count else None
     labels_share = {name: float(np.mean(y[split.test] == value)) for name, value in {"down": 0, "neutral": 1, "up": 2}.items()}
+    balanced_accuracy = float(balanced_accuracy_score(y[split.test], predicted))
+    macro_f1 = float(f1_score(y[split.test], predicted, average="macro", zero_division=0))
+    confusion = confusion_matrix(y[split.test], predicted, labels=[0, 1, 2]).tolist()
 
     print(f"Neutral direction: {args.symbol} {args.interval} {args.horizon}")
     print(f"neutral threshold: {args.neutral_return:.2%}")
     print(f"test accuracy: {accuracy:.1%}")
     print(f"non-neutral coverage: {coverage:.1%}")
     print(f"non-neutral accuracy: {'n/a' if confident_accuracy is None else f'{confident_accuracy:.1%}'}")
+    print(f"balanced accuracy: {balanced_accuracy:.1%}")
+    print(f"macro F1: {macro_f1:.3f}")
+    print(f"confusion matrix [down, neutral, up]: {confusion}")
     print(f"test labels: {labels_share}")
 
     if args.no_save:
@@ -106,6 +118,10 @@ def main() -> int:
             "non_neutral_accuracy": confident_accuracy,
             "non_neutral_lower_95": wilson_lower_bound(int(confident_correct.sum()), confident_count),
             "test_labels": labels_share,
+            "balanced_accuracy": balanced_accuracy,
+            "macro_f1": macro_f1,
+            "confusion_matrix": confusion,
+            "class_weights": {str(i): float(value) for i, value in enumerate(class_weights)},
         },
     }
     directory = ModelRegistry(artifacts_dir).save(model, model_id, metadata)

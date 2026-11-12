@@ -1,0 +1,155 @@
+{
+  "model_id": "xgboost-neutral-direction-btcusdt-1h-h7d-20261112-154710",
+  "model_type": "xgboost_neutral_direction",
+  "trained_at": "2026-11-12T15:47:10.867770+00:00",
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "horizon": "7d",
+  "horizon_periods": 168,
+  "target": "neutral_target",
+  "label_mapping": {
+    "0": "down",
+    "1": "neutral",
+    "2": "up"
+  },
+  "neutral_return": 0.01,
+  "status": "shadow",
+  "feature_columns": [
+    "log_return_1",
+    "log_return_3",
+    "log_return_6",
+    "log_return_12",
+    "log_return_24",
+    "log_return_72",
+    "log_return_168",
+    "close_to_sma_24",
+    "close_to_sma_72",
+    "close_to_sma_168",
+    "sma_24_change_24",
+    "close_to_ema_12",
+    "ema_12_to_ema_26",
+    "rsi_14",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "volatility_24",
+    "volatility_168",
+    "volatility_ratio_24_168",
+    "candle_range_pct",
+    "atr_14_pct",
+    "volume_change_1",
+    "volume_ratio_24",
+    "volume_ratio_168",
+    "volume_zscore_168",
+    "taker_buy_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "feature_pipeline_version": "1.0",
+  "feature_config": {
+    "return_windows": [
+      1,
+      3,
+      6,
+      12,
+      24,
+      72,
+      168
+    ],
+    "sma_windows": [
+      24,
+      72,
+      168
+    ],
+    "sma_change_window": 24,
+    "ema_fast": 12,
+    "ema_slow": 26,
+    "macd_signal": 9,
+    "rsi_window": 14,
+    "atr_window": 14,
+    "volatility_windows": [
+      24,
+      168
+    ],
+    "volume_windows": [
+      24,
+      168
+    ],
+    "time_features": true
+  },
+  "params": {
+    "n_estimators": 1500,
+    "learning_rate": 0.03,
+    "max_depth": 3,
+    "min_child_weight": 50,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 5.0,
+    "objective": "multi:softprob",
+    "num_class": 3,
+    "eval_metric": "mlogloss",
+    "tree_method": "hist",
+    "early_stopping_rounds": 100,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_info": {
+    "best_iteration": 0
+  },
+  "split": {
+    "gap": "7 days 00:00:00",
+    "train": {
+      "rows": 53011,
+      "start": "2017-08-24T04:00:00+00:00",
+      "end": "2024-03-23T00:00:00+00:00"
+    },
+    "validation": {
+      "rows": 11228,
+      "start": "2024-03-30T01:00:00+00:00",
+      "end": "2025-07-10T20:00:00+00:00"
+    },
+    "test": {
+      "rows": 11396,
+      "start": "2025-07-17T21:00:00+00:00",
+      "end": "2026-11-04T16:00:00+00:00"
+    }
+  },
+  "metrics": {
+    "test_accuracy": 0.3387153387153387,
+    "non_neutral_coverage": 0.5858195858195858,
+    "non_neutral_accuracy": 0.4414319952067106,
+    "non_neutral_lower_95": 0.4295575179523657,
+    "test_labels": {
+      "down": 0.45884520884520885,
+      "neutral": 0.17927342927342926,
+      "up": 0.3618813618813619
+    },
+    "balanced_accuracy": 0.34565718572347165,
+    "macro_f1": 0.3064577959688767,
+    "confusion_matrix": [
+      [
+        2430,
+        2218,
+        581
+      ],
+      [
+        874,
+        913,
+        256
+      ],
+      [
+        2018,
+        1589,
+        517
+      ]
+    ],
+    "class_weights": {
+      "0": 0.6181503804264414,
+      "1": 1.8720510068463758,
+      "2": 0.5097986127271827
+    }
+  }
+}
