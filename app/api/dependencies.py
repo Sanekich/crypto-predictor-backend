@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.versioning import PROJECT_ROOT
 from app.data.collection.binance_client import BinanceClient
 from app.data.storage import MarketDataStorage
+from app.ml.barrier.configs import ARTIFACTS_SUBDIR as BARRIER_SUBDIR
 from app.ml.registry.model_registry import ModelRegistry
 from app.services.market_data_service import MarketDataService
 from app.services.prediction_service import PredictionService
@@ -21,6 +22,12 @@ def _resolve(path: Path) -> Path:
 @lru_cache
 def get_registry() -> ModelRegistry:
     return ModelRegistry(_resolve(get_settings().model_artifacts_dir))
+
+
+@lru_cache
+def get_barrier_registry() -> ModelRegistry:
+    """New-logic models: artifacts/barrier/models, never mixed with the old logic."""
+    return ModelRegistry(_resolve(get_settings().model_artifacts_dir) / BARRIER_SUBDIR)
 
 
 @lru_cache

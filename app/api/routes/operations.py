@@ -13,10 +13,11 @@ from datetime import datetime, timezone
 from typing import Any, Literal
 
 from fastapi import APIRouter, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.exceptions import NotFoundError
 from app.core.config import get_settings
+from app.ml.barrier.configs import BARRIER_CONFIGS, FEATURE_SETS as BARRIER_FEATURE_SETS
 
 router = APIRouter(prefix="/operations", tags=["operations"])
 _jobs: dict[str, dict[str, Any]] = {}
@@ -24,9 +25,26 @@ _lock = threading.Lock()
 
 
 class OperationRequest(BaseModel):
-    action: Literal["status", "train_direction", "walk_forward", "regime_report"]
+    action: Literal["status", "train_direction", "walk_forward", "regime_report", "train_barrier"]
     horizon: Literal["24h", "7d"] = "24h"
     feature_set: Literal["v1", "v2_funding_basis", "v3_open_interest"] = "v1"
+    # New logic (train_barrier): which configuration / feature set to train, or "all"
+    barrier_config: str = "all"
+    barrier_feature_set: str = "all"
+
+    @field_validator("barrier_config")
+    @classmethod
+    def _known_config(cls, value: str) -> str:
+        if value != "all" and value not in BARRIER_CONFIGS:
+            raise ValueError(f"unknown barrier config, expected all or one of {sorted(BARRIER_CONFIGS)}")
+        return value
+
+    @field_validator("barrier_feature_set")
+    @classmethod
+    def _known_feature_set(cls, value: str) -> str:
+        if value != "all" and value not in BARRIER_FEATURE_SETS:
+            raise ValueError(f"unknown barrier feature set, expected all or one of {sorted(BARRIER_FEATURE_SETS)}")
+        return value
 
 
 class OperationSummary(BaseModel):
@@ -34,6 +52,8 @@ class OperationSummary(BaseModel):
     action: str
     horizon: str
     feature_set: str = "v1"
+    barrier_config: str | None = None
+    barrier_feature_set: str | None = None
     status: Literal["running", "completed", "failed"]
     started_at: str
     finished_at: str | None = None
@@ -55,6 +75,8 @@ def _command(request: OperationRequest) -> list[str]:
         ]
     if request.action == "walk_forward":
         return ["scripts/walk_forward_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
+    if request.action == "train_barrier":
+        return ["scripts/train_barrier_models.py", "--config", request.barrier_config, "--feature-set", request.barrier_feature_set]
     return ["scripts/regime_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
 
 
@@ -114,6 +136,8 @@ def run_operation(
             "action": request.action,
             "horizon": request.horizon,
             "feature_set": request.feature_set,
+            "barrier_config": request.barrier_config if request.action == "train_barrier" else None,
+            "barrier_feature_set": request.barrier_feature_set if request.action == "train_barrier" else None,
             "status": "running",
             "started_at": datetime.now(timezone.utc).isoformat(),
             "finished_at": None,

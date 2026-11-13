@@ -41,6 +41,8 @@ MODEL_TYPES: dict[str, type[ReturnModel]] = {
 }
 MODEL_TYPES["xgboost_direction_v2"] = XGBoostDirectionModel
 MODEL_TYPES["xgboost_direction_v3"] = XGBoostDirectionModel
+# New logic (app/ml/barrier): same classifier, different target; stored in artifacts/barrier
+MODEL_TYPES["xgboost_barrier_direction"] = XGBoostDirectionModel
 
 _SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 
@@ -132,6 +134,13 @@ class ModelRegistry:
             if latest and latest.get("model_id") == model_id:
                 raise ValueError("The latest model version cannot be deleted")
         directory = self._dir(model_id)
+        shutil.rmtree(directory)
+
+    def delete(self, model_id: str) -> None:
+        """Delete an artifact without the latest/approved checks; the caller decides."""
+        directory = self._dir(model_id)
+        if not (directory / "metadata.json").exists():
+            raise ModelNotFoundError(model_id)
         shutil.rmtree(directory)
 
     def latest(self, model_type: str, symbol: str, interval: str, horizon: str) -> dict[str, Any] | None:
