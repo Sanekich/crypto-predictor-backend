@@ -128,6 +128,8 @@ class LiveCollector:
         self.last_message_ms: dict[str, int | None] = {c.name: None for c in self.connections}
         self.connected: dict[str, bool] = {c.name: False for c in self.connections}
         self.errors = 0
+        self.flush_errors = 0
+        self.last_flush_error: str | None = None
         self.started_ms = clock_ms()
 
     # --- message handling (synchronous, unit-testable) -------------------------
@@ -204,6 +206,8 @@ class LiveCollector:
             },
             "rows_written": dict(self.writer.rows_written),
             "parse_errors": self.errors,
+            "flush_errors": self.flush_errors,
+            "last_flush_error": self.last_flush_error,
         }
 
     # --- async runtime ------------------------------------------------------------
@@ -269,7 +273,7 @@ class LiveCollector:
     async def flush_periodically(self) -> None:
         while True:
             await asyncio.sleep(self.flush_interval)
-            self.flush()
+            self._safe_flush()
 
     def flush(self) -> None:
         rows = self.writer.flush()
@@ -280,7 +284,24 @@ class LiveCollector:
             ", ".join(f"{k}={v}" for k, v in self.messages.items()),
         )
 
+    def _safe_flush(self) -> None:
+        """Flush without allowing one bad row to kill the periodic task."""
+        try:
+            self.last_flush_error = None
+            self.flush()
+        except Exception as exc:  # noqa: BLE001 - keep collection alive on disk errors
+            self.flush_errors += 1
+            self.last_flush_error = f"{type(exc).__name__}: {exc}"[:500]
+            logger.exception("Live-data flush failed; will retry on the next interval")
+            try:
+                self.writer.write_status(self.status())
+            except Exception:  # noqa: BLE001 - status is best effort during an I/O failure
+                logger.exception("Could not write collector error status")
+
     async def run(self, extra_tasks: list[Awaitable[None]] | None = None) -> None:
+        # Publish an immediate status so the dashboard does not show an old run
+        # for the first flush interval.
+        self._safe_flush()
         tasks = [asyncio.create_task(self.run_connection(c)) for c in self.connections]
         tasks.append(asyncio.create_task(self.poll_open_interest()))
         tasks.append(asyncio.create_task(self.flush_periodically()))
@@ -292,5 +313,5 @@ class LiveCollector:
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
-            self.flush()
+            self._safe_flush()
             logger.info("Collector stopped, buffers flushed")
