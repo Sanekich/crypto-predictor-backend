@@ -1,0 +1,295 @@
+{
+  "model_id": "xgboost-direction-v2-funding-basis-btcusdt-1h-h24h-20261113-162755",
+  "model_type": "xgboost_direction_v2",
+  "trained_at": "2026-11-13T16:27:55.945336+00:00",
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "horizon": "24h",
+  "horizon_periods": 24,
+  "target": "target_direction_24h",
+  "status": "shadow",
+  "feature_set": "v2_funding_basis",
+  "signal_threshold": 0.75,
+  "gate": {
+    "passed": false,
+    "threshold": 0.75,
+    "criteria": {
+      "min_independent_signals": 77,
+      "min_hit_rate": 0.75,
+      "min_hit_rate_lower_95": 0.7
+    },
+    "reasons": [
+      "only 0 independent signals >= 75% (need 77)"
+    ]
+  },
+  "walk_forward": {
+    "folds": 5,
+    "brier_skill_by_fold": [
+      0.005045277373780355,
+      -0.0011821459265317635,
+      -0.007804176681664998,
+      -0.017947698074409768,
+      -0.021758954553570575
+    ],
+    "brier_skill_mean": -0.00872953957247935,
+    "positive_folds": 1,
+    "accuracy_by_fold": [
+      0.5550010397171969,
+      0.5165315034310668,
+      0.4728633811603244,
+      0.4529008109794136,
+      0.47681430650862966
+    ],
+    "has_skill": false,
+    "criteria": {
+      "folds": 5,
+      "min_positive_folds": 4
+    }
+  },
+  "feature_columns": [
+    "log_return_1",
+    "log_return_3",
+    "log_return_6",
+    "log_return_12",
+    "log_return_24",
+    "log_return_72",
+    "log_return_168",
+    "close_to_sma_24",
+    "close_to_sma_72",
+    "close_to_sma_168",
+    "sma_24_change_24",
+    "close_to_ema_12",
+    "ema_12_to_ema_26",
+    "rsi_14",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "volatility_24",
+    "volatility_168",
+    "volatility_ratio_24_168",
+    "candle_range_pct",
+    "atr_14_pct",
+    "volume_change_1",
+    "volume_ratio_24",
+    "volume_ratio_168",
+    "volume_zscore_168",
+    "taker_buy_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos",
+    "funding_rate",
+    "funding_mean_3",
+    "funding_mean_21",
+    "basis",
+    "basis_mean_24",
+    "basis_change_24",
+    "basis_zscore_168"
+  ],
+  "feature_pipeline_version": "1.0",
+  "feature_config": {
+    "return_windows": [
+      1,
+      3,
+      6,
+      12,
+      24,
+      72,
+      168
+    ],
+    "sma_windows": [
+      24,
+      72,
+      168
+    ],
+    "sma_change_window": 24,
+    "ema_fast": 12,
+    "ema_slow": 26,
+    "macd_signal": 9,
+    "rsi_window": 14,
+    "atr_window": 14,
+    "volatility_windows": [
+      24,
+      168
+    ],
+    "volume_windows": [
+      24,
+      168
+    ],
+    "time_features": true,
+    "derivatives": [
+      "funding",
+      "basis"
+    ]
+  },
+  "params": {
+    "n_estimators": 2000,
+    "learning_rate": 0.02,
+    "max_depth": 3,
+    "min_child_weight": 100,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 5.0,
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "tree_method": "hist",
+    "early_stopping_rounds": 100,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_info": {
+    "best_iteration": 56,
+    "calibrated": true,
+    "probability_shrinkage": 1.0
+  },
+  "split": {
+    "gap": "1 days 00:00:00",
+    "train": {
+      "rows": 37493,
+      "start": "2019-12-31T02:00:00+00:00",
+      "end": "2024-07-22T21:00:00+00:00"
+    },
+    "validation": {
+      "rows": 11520,
+      "start": "2024-07-23T22:00:00+00:00",
+      "end": "2025-11-15T21:00:00+00:00"
+    },
+    "test": {
+      "rows": 8658,
+      "start": "2025-11-16T22:00:00+00:00",
+      "end": "2026-11-12T15:00:00+00:00"
+    },
+    "early_stopping": {
+      "rows": 5760,
+      "start": "2024-07-23T22:00:00+00:00",
+      "end": "2025-03-20T21:00:00+00:00"
+    },
+    "calibration": {
+      "rows": 5736,
+      "start": "2025-03-21T22:00:00+00:00",
+      "end": "2025-11-15T21:00:00+00:00"
+    }
+  },
+  "metrics": {
+    "calibration": {
+      "n": 5736,
+      "base_rate_up": 0.5277196652719666,
+      "accuracy": 0.529463040446304,
+      "always_up_accuracy": 0.5277196652719666,
+      "always_down_accuracy": 0.47228033472803344,
+      "majority_baseline_accuracy": 0.5277196652719666,
+      "brier": 0.24904020644892105,
+      "brier_base_rate": 0.24923162015721015,
+      "log_loss": 0.6912254056438994,
+      "log_loss_base_rate": 0.6916096326948564,
+      "max_confidence": 0.563397228717804,
+      "signals": {
+        "0.60": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.65": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.70": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.75": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.80": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        }
+      }
+    },
+    "test": {
+      "n": 8658,
+      "base_rate_up": 0.5019635019635019,
+      "accuracy": 0.4979209979209979,
+      "always_up_accuracy": 0.5019635019635019,
+      "always_down_accuracy": 0.4980364980364981,
+      "majority_baseline_accuracy": 0.5019635019635019,
+      "brier": 0.251712385125026,
+      "brier_base_rate": 0.2499961446600394,
+      "log_loss": 0.696583256572377,
+      "log_loss_base_rate": 0.6931394698602056,
+      "max_confidence": 0.5614444017410278,
+      "signals": {
+        "0.60": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.65": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.70": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.75": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.80": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        }
+      }
+    }
+  },
+  "code_version": {
+    "commit": "e5c9acb36f389b5989e9e6f443148f620b8a0a4a",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.13.3",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1"
+  }
+}

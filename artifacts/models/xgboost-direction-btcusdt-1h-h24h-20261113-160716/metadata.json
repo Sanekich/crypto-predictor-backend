@@ -1,0 +1,284 @@
+{
+  "model_id": "xgboost-direction-btcusdt-1h-h24h-20261113-160716",
+  "model_type": "xgboost_direction",
+  "trained_at": "2026-11-13T16:07:16.021265+00:00",
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "horizon": "24h",
+  "horizon_periods": 24,
+  "target": "target_direction_24h",
+  "status": "shadow",
+  "signal_threshold": 0.75,
+  "gate": {
+    "passed": false,
+    "threshold": 0.75,
+    "criteria": {
+      "min_independent_signals": 77,
+      "min_hit_rate": 0.75,
+      "min_hit_rate_lower_95": 0.7
+    },
+    "reasons": [
+      "only 0 independent signals >= 75% (need 77)"
+    ]
+  },
+  "walk_forward": {
+    "folds": 5,
+    "brier_skill_by_fold": [
+      -0.008273798809407262,
+      0.009426682573901668,
+      -0.0005046940773432151,
+      -0.00242859154334929,
+      0.0009143918253424754
+    ],
+    "brier_skill_mean": -0.0001732020061711248,
+    "positive_folds": 2,
+    "accuracy_by_fold": [
+      0.48574129510004727,
+      0.5181975736568457,
+      0.5424610051993067,
+      0.5238695446667717,
+      0.5191429021585001
+    ],
+    "has_skill": false,
+    "criteria": {
+      "folds": 5,
+      "min_positive_folds": 4
+    }
+  },
+  "feature_columns": [
+    "log_return_1",
+    "log_return_3",
+    "log_return_6",
+    "log_return_12",
+    "log_return_24",
+    "log_return_72",
+    "log_return_168",
+    "close_to_sma_24",
+    "close_to_sma_72",
+    "close_to_sma_168",
+    "sma_24_change_24",
+    "close_to_ema_12",
+    "ema_12_to_ema_26",
+    "rsi_14",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "volatility_24",
+    "volatility_168",
+    "volatility_ratio_24_168",
+    "candle_range_pct",
+    "atr_14_pct",
+    "volume_change_1",
+    "volume_ratio_24",
+    "volume_ratio_168",
+    "volume_zscore_168",
+    "taker_buy_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "feature_pipeline_version": "1.0",
+  "feature_config": {
+    "return_windows": [
+      1,
+      3,
+      6,
+      12,
+      24,
+      72,
+      168
+    ],
+    "sma_windows": [
+      24,
+      72,
+      168
+    ],
+    "sma_change_window": 24,
+    "ema_fast": 12,
+    "ema_slow": 26,
+    "macd_signal": 9,
+    "rsi_window": 14,
+    "atr_window": 14,
+    "volatility_windows": [
+      24,
+      168
+    ],
+    "volume_windows": [
+      24,
+      168
+    ],
+    "time_features": true,
+    "derivatives": []
+  },
+  "params": {
+    "n_estimators": 2000,
+    "learning_rate": 0.02,
+    "max_depth": 3,
+    "min_child_weight": 100,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 5.0,
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "tree_method": "hist",
+    "early_stopping_rounds": 100,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_info": {
+    "best_iteration": 110,
+    "calibrated": true,
+    "probability_shrinkage": 1.0
+  },
+  "split": {
+    "gap": "1 days 00:00:00",
+    "train": {
+      "rows": 49485,
+      "start": "2017-08-24T04:00:00+00:00",
+      "end": "2023-10-27T20:00:00+00:00"
+    },
+    "validation": {
+      "rows": 15209,
+      "start": "2023-10-28T21:00:00+00:00",
+      "end": "2025-07-23T13:00:00+00:00"
+    },
+    "test": {
+      "rows": 11426,
+      "start": "2025-07-24T14:00:00+00:00",
+      "end": "2026-11-12T15:00:00+00:00"
+    },
+    "early_stopping": {
+      "rows": 7604,
+      "start": "2023-10-28T21:00:00+00:00",
+      "end": "2024-09-09T16:00:00+00:00"
+    },
+    "calibration": {
+      "rows": 7581,
+      "start": "2024-09-10T17:00:00+00:00",
+      "end": "2025-07-23T13:00:00+00:00"
+    }
+  },
+  "metrics": {
+    "calibration": {
+      "n": 7581,
+      "base_rate_up": 0.5372642131644901,
+      "accuracy": 0.5359451259728268,
+      "always_up_accuracy": 0.5372642131644901,
+      "always_down_accuracy": 0.46273578683550987,
+      "majority_baseline_accuracy": 0.5372642131644901,
+      "brier": 0.24805061038659548,
+      "brier_base_rate": 0.24861137841723144,
+      "log_loss": 0.6892555408398027,
+      "log_loss_base_rate": 0.6903673606385254,
+      "max_confidence": 0.6300212740898132,
+      "signals": {
+        "0.60": {
+          "signals": 147,
+          "share_of_time": 0.019390581717451522,
+          "hit_rate": 0.4557823129251701,
+          "independent_signals": 17,
+          "independent_hit_rate": 0.4117647058823529,
+          "hit_rate_lower_95": 0.21610786039131383
+        },
+        "0.65": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.70": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.75": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.80": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        }
+      }
+    },
+    "test": {
+      "n": 11426,
+      "base_rate_up": 0.5009627166112375,
+      "accuracy": 0.5014878347628217,
+      "always_up_accuracy": 0.5009627166112375,
+      "always_down_accuracy": 0.4990372833887625,
+      "majority_baseline_accuracy": 0.5009627166112375,
+      "brier": 0.2501132400455827,
+      "brier_base_rate": 0.24999907317672643,
+      "log_loss": 0.693363530027814,
+      "log_loss_base_rate": 0.6931453269122528,
+      "max_confidence": 0.6405785083770752,
+      "signals": {
+        "0.60": {
+          "signals": 379,
+          "share_of_time": 0.03316996324172939,
+          "hit_rate": 0.633245382585752,
+          "independent_signals": 45,
+          "independent_hit_rate": 0.6444444444444445,
+          "hit_rate_lower_95": 0.49835546011952203
+        },
+        "0.65": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.70": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.75": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        },
+        "0.80": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "independent_signals": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null
+        }
+      }
+    }
+  },
+  "code_version": {
+    "commit": "2169f5c70126fadbf60cb28564dfd16669071947",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.13.3",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1"
+  }
+}

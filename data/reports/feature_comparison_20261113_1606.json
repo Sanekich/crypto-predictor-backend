@@ -1,0 +1,351 @@
+{
+  "generated_at": "2026-11-13T16:03:42.267792+00:00",
+  "symbol": "BTCUSDT",
+  "folds": 5,
+  "tasks": {
+    "direction_4h": {
+      "rows": 40572,
+      "period": "2021-03-25 .. 2026-11-11",
+      "results": {
+        "v1 base (candles)": {
+          "features": 31,
+          "brier_skill_mean": 0.0020967616253734223,
+          "brier_skill_by_fold": [
+            0.0016161025984668953,
+            -0.0008154012227812313,
+            0.005020329330533202,
+            0.004095836845975587,
+            0.0005669405746726586
+          ],
+          "accuracy_mean": 0.5245785270629991,
+          "majority_baseline_mean": 0.5114463176574977,
+          "max_confidence": 0.6591458916664124,
+          "signals_60_independent": 209,
+          "signals_60_hit_rate": 0.5645933014354068,
+          "verdict_vs_base": "-"
+        },
+        "v2 +funding +basis": {
+          "features": 38,
+          "brier_skill_mean": 0.0015914493348611503,
+          "brier_skill_by_fold": [
+            0.0008505926734386771,
+            -0.0032735128892737997,
+            0.005500038680653407,
+            0.004227683385868541,
+            0.0006524448236189251
+          ],
+          "accuracy_mean": 0.5237503697131027,
+          "majority_baseline_mean": 0.5114463176574977,
+          "max_confidence": 0.6533583998680115,
+          "signals_60_independent": 228,
+          "signals_60_hit_rate": 0.5657894736842105,
+          "verdict_vs_base": "no gain (3/5 folds)"
+        },
+        "v2b +dvol": {
+          "features": 41,
+          "brier_skill_mean": 0.002131622820005852,
+          "brier_skill_by_fold": [
+            0.005103179292129667,
+            -0.002774127650557512,
+            0.004612450997391937,
+            0.003531966909952944,
+            0.000184644551112223
+          ],
+          "accuracy_mean": 0.5249926057379473,
+          "majority_baseline_mean": 0.5114463176574977,
+          "max_confidence": 0.649957001209259,
+          "signals_60_independent": 251,
+          "signals_60_hit_rate": 0.5936254980079682,
+          "verdict_vs_base": "unclear (1/5 folds)"
+        },
+        "v3 +open interest": {
+          "features": 44,
+          "brier_skill_mean": 0.0026314844042411023,
+          "brier_skill_by_fold": [
+            0.006922475905642211,
+            -0.001169929688008997,
+            0.005129596250171176,
+            0.00297234390164669,
+            -0.0006970643482455685
+          ],
+          "accuracy_mean": 0.5272996154983732,
+          "majority_baseline_mean": 0.5114463176574977,
+          "max_confidence": 0.658819854259491,
+          "signals_60_independent": 264,
+          "signals_60_hit_rate": 0.6022727272727273,
+          "verdict_vs_base": "unclear (2/5 folds)"
+        },
+        "v3 all": {
+          "features": 47,
+          "brier_skill_mean": 0.0027070332833609044,
+          "brier_skill_by_fold": [
+            0.006682329676819143,
+            -0.0001341632696481021,
+            0.00513139412352126,
+            0.0038373300149444622,
+            -0.0019817241288322407
+          ],
+          "accuracy_mean": 0.5226855959775214,
+          "majority_baseline_mean": 0.5114463176574977,
+          "max_confidence": 0.6482955813407898,
+          "signals_60_independent": 208,
+          "signals_60_hit_rate": 0.5769230769230769,
+          "verdict_vs_base": "unclear (3/5 folds)"
+        }
+      }
+    },
+    "direction_24h": {
+      "rows": 40572,
+      "period": "2021-03-25 .. 2026-11-11",
+      "results": {
+        "v1 base (candles)": {
+          "features": 31,
+          "brier_skill_mean": -0.01947206572127913,
+          "brier_skill_by_fold": [
+            -0.038342203128006735,
+            -0.024219520735709432,
+            -0.018072307686195277,
+            -0.01803747641939024,
+            0.0013111793629060342
+          ],
+          "accuracy_mean": 0.49405501330967166,
+          "majority_baseline_mean": 0.5227447500739426,
+          "max_confidence": 0.6752330660820007,
+          "signals_60_independent": 69,
+          "signals_60_hit_rate": 0.5217391304347826,
+          "verdict_vs_base": "-"
+        },
+        "v2 +funding +basis": {
+          "features": 38,
+          "brier_skill_mean": -0.015536086624385926,
+          "brier_skill_by_fold": [
+            -0.011690259938411662,
+            -0.022298816206764105,
+            -0.013921935906064498,
+            -0.018034932147569904,
+            -0.011734488923119457
+          ],
+          "accuracy_mean": 0.48364389233954447,
+          "majority_baseline_mean": 0.5227447500739426,
+          "max_confidence": 0.730343222618103,
+          "signals_60_independent": 57,
+          "signals_60_hit_rate": 0.49122807017543857,
+          "verdict_vs_base": "BETTER (4/5 folds)"
+        },
+        "v2b +dvol": {
+          "features": 41,
+          "brier_skill_mean": -0.01260719989242549,
+          "brier_skill_by_fold": [
+            -0.011791919788717964,
+            -0.022478420257563192,
+            -0.01146444685480752,
+            -0.018231944625401342,
+            0.0009307320643625605
+          ],
+          "accuracy_mean": 0.4815143448683822,
+          "majority_baseline_mean": 0.5227447500739426,
+          "max_confidence": 0.5860155820846558,
+          "signals_60_independent": 0,
+          "signals_60_hit_rate": null,
+          "verdict_vs_base": "unclear (3/5 folds)"
+        },
+        "v3 +open interest": {
+          "features": 44,
+          "brier_skill_mean": -0.015240893115976695,
+          "brier_skill_by_fold": [
+            -0.020520947894187902,
+            -0.02323638124371974,
+            -0.013949376905886934,
+            -0.01803059691685238,
+            -0.00046716261923651636
+          ],
+          "accuracy_mean": 0.4880212954747116,
+          "majority_baseline_mean": 0.5227447500739426,
+          "max_confidence": 0.6132097542285919,
+          "signals_60_independent": 16,
+          "signals_60_hit_rate": 0.625,
+          "verdict_vs_base": "BETTER (4/5 folds)"
+        },
+        "v3 all": {
+          "features": 47,
+          "brier_skill_mean": -0.013806109048019622,
+          "brier_skill_by_fold": [
+            -0.018127029938143968,
+            -0.02265865944697265,
+            -0.011466061038479802,
+            -0.01828841088076172,
+            0.0015096160642600331
+          ],
+          "accuracy_mean": 0.4970718722271517,
+          "majority_baseline_mean": 0.5227447500739426,
+          "max_confidence": 0.6273717880249023,
+          "signals_60_independent": 13,
+          "signals_60_hit_rate": 0.5384615384615384,
+          "verdict_vs_base": "BETTER (4/5 folds)"
+        }
+      }
+    },
+    "range_24h": {
+      "rows": 40572,
+      "period": "2021-03-25 .. 2026-11-11",
+      "results": {
+        "v1 base (candles)": {
+          "features": 31,
+          "pinball_skill_mean": 0.03132864353285945,
+          "pinball_skill_by_fold": [
+            0.0079347405401482,
+            0.017222900043238565,
+            0.0821578247328143,
+            0.027550931780870425,
+            0.02177682056722574
+          ],
+          "coverage_mean": 0.8221236320615202,
+          "width_correlation_mean": 0.254737602459483,
+          "mean_width": 0.057787112843029065,
+          "verdict_vs_base": "-"
+        },
+        "v2 +funding +basis": {
+          "features": 38,
+          "pinball_skill_mean": 0.029362646711815453,
+          "pinball_skill_by_fold": [
+            0.01048496868086013,
+            0.017535376911708145,
+            0.08738784787190124,
+            0.021611086459405238,
+            0.009793953635202524
+          ],
+          "coverage_mean": 0.810706891452233,
+          "width_correlation_mean": 0.2471929661352028,
+          "mean_width": 0.05645422059278482,
+          "verdict_vs_base": "no gain (3/5 folds)"
+        },
+        "v2b +dvol": {
+          "features": 41,
+          "pinball_skill_mean": 0.030588110807827706,
+          "pinball_skill_by_fold": [
+            0.003395489530892526,
+            0.013659593927084934,
+            0.09103909469995608,
+            0.03228516941769721,
+            0.01256120646350778
+          ],
+          "coverage_mean": 0.790002957704821,
+          "width_correlation_mean": 0.22472009670548126,
+          "mean_width": 0.05286909614711547,
+          "verdict_vs_base": "no gain (2/5 folds)"
+        },
+        "v3 +open interest": {
+          "features": 44,
+          "pinball_skill_mean": 0.015889829966491777,
+          "pinball_skill_by_fold": [
+            0.006213192119432054,
+            0.014173113645156166,
+            0.025027265179544456,
+            0.032973776827981194,
+            0.0010618020603450073
+          ],
+          "coverage_mean": 0.8238982549541556,
+          "width_correlation_mean": 0.2251198049725637,
+          "mean_width": 0.05909454132997973,
+          "verdict_vs_base": "no gain (1/5 folds)"
+        },
+        "v3 all": {
+          "features": 47,
+          "pinball_skill_mean": 0.014073839649730658,
+          "pinball_skill_by_fold": [
+            -0.00011979976657472413,
+            0.011088662657672277,
+            0.01786365098921794,
+            0.0306097117243308,
+            0.010926972644006994
+          ],
+          "coverage_mean": 0.8156166814551907,
+          "width_correlation_mean": 0.19385438270098146,
+          "mean_width": 0.05740426044527709,
+          "verdict_vs_base": "no gain (1/5 folds)"
+        }
+      }
+    },
+    "range_7d": {
+      "rows": 40441,
+      "period": "2021-03-25 .. 2026-11-06",
+      "results": {
+        "v1 base (candles)": {
+          "features": 31,
+          "pinball_skill_mean": -0.010773959521271493,
+          "pinball_skill_by_fold": [
+            -0.005986520204533496,
+            -1.6533827097209297e-05,
+            0.009789827358400616,
+            -0.05118457914790486,
+            -0.006471991785222508
+          ],
+          "coverage_mean": 0.8717507418397628,
+          "width_correlation_mean": -0.054771885370491616,
+          "mean_width": 0.18173099024022324,
+          "verdict_vs_base": "-"
+        },
+        "v2 +funding +basis": {
+          "features": 38,
+          "pinball_skill_mean": -0.010877759652716711,
+          "pinball_skill_by_fold": [
+            -0.000122733565275146,
+            0.00021114826186274804,
+            0.009268492252484162,
+            -0.06114136914887225,
+            -0.002604336063783075
+          ],
+          "coverage_mean": 0.8634421364985163,
+          "width_correlation_mean": -0.033067308939470144,
+          "mean_width": 0.18117839212935996,
+          "verdict_vs_base": "no gain (3/5 folds)"
+        },
+        "v2b +dvol": {
+          "features": 41,
+          "pinball_skill_mean": -0.022350805572830444,
+          "pinball_skill_by_fold": [
+            -9.980068506898476e-05,
+            0.003986764369215745,
+            0.07516526042688021,
+            -0.19074623187480189,
+            -6.0020100377311536e-05
+          ],
+          "coverage_mean": 0.8265281899109793,
+          "width_correlation_mean": -0.125764350212383,
+          "mean_width": 0.1703431920807388,
+          "verdict_vs_base": "no gain (4/5 folds)"
+        },
+        "v3 +open interest": {
+          "features": 44,
+          "pinball_skill_mean": -0.011805555546785262,
+          "pinball_skill_by_fold": [
+            -2.4020583097694725e-05,
+            0.005755380721706893,
+            0.0008048407350699227,
+            0.02192005874024172,
+            -0.08748403734784715
+          ],
+          "coverage_mean": 0.8694955489614244,
+          "width_correlation_mean": -0.11484804396085288,
+          "mean_width": 0.17930892318111322,
+          "verdict_vs_base": "no gain (3/5 folds)"
+        },
+        "v3 all": {
+          "features": 47,
+          "pinball_skill_mean": -0.02864881412884468,
+          "pinball_skill_by_fold": [
+            0.0004171222693227783,
+            0.008555993758930125,
+            0.0038971952792189457,
+            -0.0746921151141553,
+            -0.08142226683753995
+          ],
+          "coverage_mean": 0.8449851632047478,
+          "width_correlation_mean": -0.13290264445118932,
+          "mean_width": 0.1728175239880871,
+          "verdict_vs_base": "no gain (2/5 folds)"
+        }
+      }
+    }
+  }
+}
