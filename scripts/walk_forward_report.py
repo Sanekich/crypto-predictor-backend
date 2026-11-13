@@ -18,8 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app.core.config import get_settings  # noqa: E402
-from app.data.storage import MarketDataStorage  # noqa: E402
-from app.features.feature_pipeline import build_dataset  # noqa: E402
+from app.features.feature_sets import load_direction_dataset  # noqa: E402
 from app.ml.evaluation.walk_forward import evaluate_direction_walk_forward  # noqa: E402
 
 
@@ -29,16 +28,16 @@ def main() -> int:
     parser.add_argument("--interval", default="1h")
     parser.add_argument("--horizon", default="24h")
     parser.add_argument("--folds", type=int, default=4)
+    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis"), default="v1")
     args = parser.parse_args()
 
     settings = get_settings()
     data_dir = settings.data_dir if settings.data_dir.is_absolute() else ROOT / settings.data_dir
-    data = MarketDataStorage(data_dir).load_processed(settings.market_data_provider, args.symbol, args.interval)
-    if data is None:
-        print("No processed data. Run scripts/download_data.py first.", file=sys.stderr)
+    try:
+        dataset = load_direction_dataset(data_dir, settings.market_data_provider, args.symbol, args.interval, args.horizon, args.feature_set)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"Cannot prepare {args.feature_set} dataset: {exc}", file=sys.stderr)
         return 1
-
-    dataset = build_dataset(data, args.interval, args.horizon)
     results = evaluate_direction_walk_forward(
         dataset.frame,
         dataset.feature_columns,
@@ -50,7 +49,7 @@ def main() -> int:
         print("No valid folds could be created.", file=sys.stderr)
         return 1
 
-    print(f"Walk-forward direction report: {args.symbol} {args.interval} {args.horizon}")
+    print(f"Walk-forward direction report: {args.symbol} {args.interval} {args.horizon} ({args.feature_set})")
     print(f"{'fold':>4} {'test period':^45} {'accuracy':>10} {'indep acc':>10} {'brier':>10} {'max conf':>10}")
     for result in results:
         period = f"{result['test_start'][:10]} .. {result['test_end'][:10]}"

@@ -23,8 +23,8 @@ from app.core.config import get_settings  # noqa: E402
 from app.core.logging import setup_logging  # noqa: E402
 from app.core.versioning import environment_info, git_revision  # noqa: E402
 from app.data.intervals import INTERVAL_MS, interval_to_timedelta  # noqa: E402
-from app.data.storage import MarketDataStorage  # noqa: E402
-from app.features.feature_pipeline import FEATURE_PIPELINE_VERSION, build_dataset  # noqa: E402
+from app.features.feature_pipeline import FEATURE_PIPELINE_VERSION  # noqa: E402
+from app.features.feature_sets import FEATURE_SET_LABELS, load_direction_dataset  # noqa: E402
 from app.ml.registry.model_registry import ModelRegistry, make_model_id  # noqa: E402
 from app.ml.training.train_direction import SIGNAL_THRESHOLD, train_direction_model, walk_forward_skill  # noqa: E402
 
@@ -38,6 +38,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--symbol", default="BTCUSDT")
     parser.add_argument("--interval", default="1h", choices=list(INTERVAL_MS))
     parser.add_argument("--horizon", default="4h")
+    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis"), default="v1")
+    parser.add_argument("--shadow-only", action="store_true", help="save the artifact only as shadow, never approved")
     parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args(argv)
 
@@ -49,12 +51,11 @@ def main(argv: list[str] | None = None) -> int:
         settings.model_artifacts_dir if settings.model_artifacts_dir.is_absolute() else ROOT / settings.model_artifacts_dir
     )
 
-    ohlcv = MarketDataStorage(data_dir).load_processed(provider, symbol, args.interval)
-    if ohlcv is None:
-        print("No processed data. Run scripts/download_data.py first.", file=sys.stderr)
+    try:
+        dataset = load_direction_dataset(data_dir, provider, symbol, args.interval, args.horizon, args.feature_set)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"Cannot prepare {args.feature_set} dataset: {exc}", file=sys.stderr)
         return 1
-
-    dataset = build_dataset(ohlcv, args.interval, args.horizon)
     gap = interval_to_timedelta(args.interval) * dataset.horizon_periods
     result = train_direction_model(
         dataset.frame, dataset.feature_columns, dataset.target_direction_column, dataset.horizon_periods, gap
@@ -71,6 +72,7 @@ def main(argv: list[str] | None = None) -> int:
         info = result.split_info[name]
         print(f"{name:<15}: {info['rows']:>6} rows  {info['start'][:10]} .. {info['end'][:10]}")
     print()
+    print(f"Feature set          : {args.feature_set} ({FEATURE_SET_LABELS[args.feature_set]})")
     print(f"Test accuracy        : {test['accuracy']:.1%}")
     print(f"Always UP baseline   : {test['always_up_accuracy']:.1%}")
     print(f"Always DOWN baseline : {test['always_down_accuracy']:.1%}")
@@ -88,7 +90,8 @@ def main(argv: list[str] | None = None) -> int:
     folds = ", ".join(f"{s:+.3f}" for s in skill["brier_skill_by_fold"])
     print(f"Walk-forward skill   : {skill['brier_skill_mean']:+.4f}  [{folds}]  positive {skill['positive_folds']}/{skill['folds']}")
     print(f"Direction shown      : {'YES (beats base rate on most folds)' if skill['has_skill'] else 'NO (no stable skill)'}")
-    print(f"Status: {result.status.upper()}")
+    saved_status = "shadow" if args.shadow_only else result.status
+    print(f"Status: {saved_status.upper()}")
     for reason in result.gate["reasons"]:
         print(f"  - {reason}")
 
@@ -96,7 +99,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     trained_at = datetime.now(timezone.utc)
-    model_id = make_model_id("xgboost-direction", symbol, args.interval, args.horizon, trained_at)
+    model_prefix = "xgboost-direction" if args.feature_set == "v1" else "xgboost-direction-v2-funding-basis"
+    model_id = make_model_id(model_prefix, symbol, args.interval, args.horizon, trained_at)
     metadata = {
         "trained_at": trained_at.isoformat(),
         "provider": provider,
@@ -105,7 +109,8 @@ def main(argv: list[str] | None = None) -> int:
         "horizon": args.horizon,
         "horizon_periods": dataset.horizon_periods,
         "target": dataset.target_direction_column,
-        "status": result.status,
+        "status": saved_status,
+        "feature_set": args.feature_set,
         "signal_threshold": SIGNAL_THRESHOLD,
         "gate": result.gate,
         "walk_forward": skill,
@@ -119,7 +124,8 @@ def main(argv: list[str] | None = None) -> int:
         "code_version": git_revision(),
         "environment": environment_info(),
     }
-    directory = ModelRegistry(artifacts_dir).save(result.model, model_id, metadata)
+    registry_model_type = "xgboost_direction" if args.feature_set == "v1" else "xgboost_direction_v2"
+    directory = ModelRegistry(artifacts_dir).save(result.model, model_id, metadata, model_type=registry_model_type)
     print()
     print(f"Saved model : {model_id}")
     print(f"Artifacts   : {directory}")

@@ -26,12 +26,14 @@ _lock = threading.Lock()
 class OperationRequest(BaseModel):
     action: Literal["status", "train_direction", "walk_forward", "regime_report"]
     horizon: Literal["24h", "7d"] = "24h"
+    feature_set: Literal["v1", "v2_funding_basis"] = "v1"
 
 
 class OperationSummary(BaseModel):
     job_id: str
     action: str
     horizon: str
+    feature_set: str = "v1"
     status: Literal["running", "completed", "failed"]
     started_at: str
     finished_at: str | None = None
@@ -43,10 +45,17 @@ def _command(request: OperationRequest) -> list[str]:
     if request.action == "status":
         return ["scripts/status_report.py"]
     if request.action == "train_direction":
-        return ["scripts/train_direction_model.py", "--horizon", request.horizon]
+        return [
+            "scripts/train_direction_model.py",
+            "--horizon",
+            request.horizon,
+            "--feature-set",
+            request.feature_set,
+            "--shadow-only",
+        ]
     if request.action == "walk_forward":
-        return ["scripts/walk_forward_report.py", "--horizon", request.horizon]
-    return ["scripts/regime_report.py", "--horizon", request.horizon]
+        return ["scripts/walk_forward_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
+    return ["scripts/regime_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
 
 
 def _run(job_id: str, request: OperationRequest) -> None:
@@ -104,6 +113,7 @@ def run_operation(
             "job_id": job_id,
             "action": request.action,
             "horizon": request.horizon,
+            "feature_set": request.feature_set,
             "status": "running",
             "started_at": datetime.now(timezone.utc).isoformat(),
             "finished_at": None,

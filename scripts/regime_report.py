@@ -20,8 +20,8 @@ sys.path.insert(0, str(ROOT))
 
 from app.core.config import get_settings  # noqa: E402
 from app.data.intervals import interval_to_timedelta  # noqa: E402
-from app.data.storage import MarketDataStorage  # noqa: E402
-from app.features.feature_pipeline import FeatureConfig, build_dataset  # noqa: E402
+from app.features.feature_pipeline import FeatureConfig  # noqa: E402
+from app.features.feature_sets import load_direction_dataset  # noqa: E402
 from app.ml.evaluation.regimes import REGIMES, label_regimes, regime_features  # noqa: E402
 from app.ml.evaluation.splits import chronological_split  # noqa: E402
 from app.ml.models.direction_model import DirectionModel  # noqa: E402
@@ -34,22 +34,23 @@ def main() -> int:
     parser.add_argument("--symbol", default="BTCUSDT")
     parser.add_argument("--interval", default="1h")
     parser.add_argument("--horizon", default="24h")
+    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis"), default="v1")
     args = parser.parse_args()
 
     settings = get_settings()
     data_dir = settings.data_dir if settings.data_dir.is_absolute() else ROOT / settings.data_dir
     artifacts_dir = settings.model_artifacts_dir if settings.model_artifacts_dir.is_absolute() else ROOT / settings.model_artifacts_dir
-    ohlcv = MarketDataStorage(data_dir).load_processed(settings.market_data_provider, args.symbol, args.interval)
-    if ohlcv is None:
-        print("No processed data. Run scripts/download_data.py first.", file=sys.stderr)
+    try:
+        dataset = load_direction_dataset(data_dir, settings.market_data_provider, args.symbol, args.interval, args.horizon, args.feature_set)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"Cannot prepare {args.feature_set} dataset: {exc}", file=sys.stderr)
         return 1
-
-    dataset = build_dataset(ohlcv, args.interval, args.horizon)
     frame = dataset.frame
     gap = interval_to_timedelta(args.interval) * dataset.horizon_periods
     split = chronological_split(frame["timestamp"], gap)
     registry = ModelRegistry(artifacts_dir)
-    meta = registry.latest("xgboost_direction", args.symbol, args.interval, args.horizon)
+    model_type = "xgboost_direction" if args.feature_set == "v1" else "xgboost_direction_v2"
+    meta = registry.latest(model_type, args.symbol, args.interval, args.horizon)
     if meta is None:
         print("No saved direction model for this horizon.", file=sys.stderr)
         return 1
@@ -70,7 +71,7 @@ def main() -> int:
     confidence = np.maximum(p_up, 1 - p_up)
     regime_test = regimes.iloc[split.test]
 
-    print(f"Regime report: {args.symbol} {args.interval} {args.horizon}")
+    print(f"Regime report: {args.symbol} {args.interval} {args.horizon} ({args.feature_set})")
     print(f"model: {meta['model_id']} ({meta.get('status', 'n/a')})")
     print(f"{'regime':<18} {'rows':>7} {'accuracy':>10} {'baseline':>10} {'mean conf':>10}")
     for regime in REGIMES:

@@ -39,6 +39,7 @@ MODEL_TYPES: dict[str, type[ReturnModel]] = {
         XGBoostNeutralDirectionModel,
     )
 }
+MODEL_TYPES["xgboost_direction_v2"] = XGBoostDirectionModel
 
 _SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 
@@ -72,12 +73,18 @@ class ModelRegistry:
             raise ValueError(f"Invalid model id: {model_id!r}")
         return self.models_dir / model_id
 
-    def save(self, model: ReturnModel, model_id: str, metadata: dict[str, Any]) -> Path:
+    def save(
+        self,
+        model: ReturnModel,
+        model_id: str,
+        metadata: dict[str, Any],
+        model_type: str | None = None,
+    ) -> Path:
         directory = self._dir(model_id)
         if directory.exists():
             raise FileExistsError(f"Model {model_id} already exists")
         model.save(directory)
-        full_metadata = {"model_id": model_id, "model_type": model.name, **metadata}
+        full_metadata = {"model_id": model_id, "model_type": model_type or model.name, **metadata}
         tmp = directory / "metadata.json.tmp"
         tmp.write_text(json.dumps(_json_safe(full_metadata), ensure_ascii=False, indent=2), encoding="utf-8")
         os.replace(tmp, directory / "metadata.json")
