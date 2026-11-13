@@ -28,7 +28,7 @@ def main() -> int:
     parser.add_argument("--interval", default="1h")
     parser.add_argument("--horizon", default="24h")
     parser.add_argument("--folds", type=int, default=4)
-    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis"), default="v1")
+    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis", "v3_open_interest"), default="v1")
     args = parser.parse_args()
 
     settings = get_settings()

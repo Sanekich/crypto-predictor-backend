@@ -26,7 +26,7 @@ _lock = threading.Lock()
 class OperationRequest(BaseModel):
     action: Literal["status", "train_direction", "walk_forward", "regime_report"]
     horizon: Literal["24h", "7d"] = "24h"
-    feature_set: Literal["v1", "v2_funding_basis"] = "v1"
+    feature_set: Literal["v1", "v2_funding_basis", "v3_open_interest"] = "v1"
 
 
 class OperationSummary(BaseModel):

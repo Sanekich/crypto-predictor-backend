@@ -40,6 +40,7 @@ MODEL_TYPES: dict[str, type[ReturnModel]] = {
     )
 }
 MODEL_TYPES["xgboost_direction_v2"] = XGBoostDirectionModel
+MODEL_TYPES["xgboost_direction_v3"] = XGBoostDirectionModel
 
 _SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 

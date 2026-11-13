@@ -34,7 +34,7 @@ def main() -> int:
     parser.add_argument("--symbol", default="BTCUSDT")
     parser.add_argument("--interval", default="1h")
     parser.add_argument("--horizon", default="24h")
-    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis"), default="v1")
+    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis", "v3_open_interest"), default="v1")
     args = parser.parse_args()
 
     settings = get_settings()
@@ -49,7 +49,11 @@ def main() -> int:
     gap = interval_to_timedelta(args.interval) * dataset.horizon_periods
     split = chronological_split(frame["timestamp"], gap)
     registry = ModelRegistry(artifacts_dir)
-    model_type = "xgboost_direction" if args.feature_set == "v1" else "xgboost_direction_v2"
+    model_type = {
+        "v1": "xgboost_direction",
+        "v2_funding_basis": "xgboost_direction_v2",
+        "v3_open_interest": "xgboost_direction_v3",
+    }[args.feature_set]
     meta = registry.latest(model_type, args.symbol, args.interval, args.horizon)
     if meta is None:
         print("No saved direction model for this horizon.", file=sys.stderr)

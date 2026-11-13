@@ -38,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--symbol", default="BTCUSDT")
     parser.add_argument("--interval", default="1h", choices=list(INTERVAL_MS))
     parser.add_argument("--horizon", default="4h")
-    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis"), default="v1")
+    parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis", "v3_open_interest"), default="v1")
     parser.add_argument("--shadow-only", action="store_true", help="save the artifact only as shadow, never approved")
     parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args(argv)
@@ -99,7 +99,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     trained_at = datetime.now(timezone.utc)
-    model_prefix = "xgboost-direction" if args.feature_set == "v1" else "xgboost-direction-v2-funding-basis"
+    model_prefixes = {
+        "v1": "xgboost-direction",
+        "v2_funding_basis": "xgboost-direction-v2-funding-basis",
+        "v3_open_interest": "xgboost-direction-v3-open-interest",
+    }
+    model_prefix = model_prefixes[args.feature_set]
     model_id = make_model_id(model_prefix, symbol, args.interval, args.horizon, trained_at)
     metadata = {
         "trained_at": trained_at.isoformat(),
@@ -124,7 +129,11 @@ def main(argv: list[str] | None = None) -> int:
         "code_version": git_revision(),
         "environment": environment_info(),
     }
-    registry_model_type = "xgboost_direction" if args.feature_set == "v1" else "xgboost_direction_v2"
+    registry_model_type = {
+        "v1": "xgboost_direction",
+        "v2_funding_basis": "xgboost_direction_v2",
+        "v3_open_interest": "xgboost_direction_v3",
+    }[args.feature_set]
     directory = ModelRegistry(artifacts_dir).save(result.model, model_id, metadata, model_type=registry_model_type)
     print()
     print(f"Saved model : {model_id}")
