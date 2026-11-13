@@ -26,7 +26,6 @@ from app.ml.evaluation.regimes import REGIMES, label_regimes, regime_features  #
 from app.ml.evaluation.splits import chronological_split  # noqa: E402
 from app.ml.models.direction_model import DirectionModel  # noqa: E402
 from app.ml.registry.model_registry import ModelRegistry  # noqa: E402
-from app.services.features_service import check_compatibility, latest_features  # noqa: E402
 
 
 def main() -> int:
@@ -58,7 +57,13 @@ def main() -> int:
     if meta is None:
         print("No saved direction model for this horizon.", file=sys.stderr)
         return 1
-    check_compatibility(meta, FeatureConfig())
+    # This report is explicitly offline: it computes the same derivatives
+    # features used during training. The API inference guard must not reject
+    # v2/v3 here; only require that the saved config matches this dataset.
+    stored_config = FeatureConfig.from_dict(meta.get("feature_config") or {})
+    if stored_config != dataset.config:
+        print("Saved model feature configuration does not match the selected dataset.", file=sys.stderr)
+        return 1
     model, _ = registry.load(meta["model_id"])
     if not isinstance(model, DirectionModel):
         print("Saved model is not a direction model.", file=sys.stderr)
