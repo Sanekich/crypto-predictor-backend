@@ -78,7 +78,7 @@ def _command(request: OperationRequest) -> list[str]:
     if request.action == "train_barrier":
         return ["scripts/train_barrier_models.py", "--config", request.barrier_config, "--feature-set", request.barrier_feature_set]
     if request.action == "train_pytorch":
-        return ["scripts/train_pytorch_model.py", "--horizon", request.horizon, "--shadow-only"]
+        return ["scripts/train_pytorch_barrier_model.py", "--config", "move_1pct_24h", "--feature-set", "all_data", "--shadow-only"]
     return ["scripts/regime_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
 
 
