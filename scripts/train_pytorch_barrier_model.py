@@ -89,7 +89,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Train resolved      : {len(train_known)}")
     print(f"Validation resolved : {len(val_known)}")
     print(f"Test rows           : {len(p)} (resolved {metrics['n_resolved']} / {metrics['n']})")
-    print(f"Feature set         : {FEATURE_SET_LABELS[args.feature_set]}")
+    # Keep CLI output ASCII-safe: Windows PowerShell may use cp1252 and cannot
+    # encode the Russian human-readable feature-set label.
+    print(f"Feature set         : {args.feature_set}")
     print(f"Test accuracy       : {metrics['accuracy']:.1%} (majority {metrics['majority_baseline_accuracy']:.1%})" if metrics['accuracy'] is not None else "Test accuracy       : n/a")
     print(f"Brier skill         : {metrics['brier_skill']:+.4f}" if metrics['brier_skill'] is not None else "Brier skill         : n/a")
     print(f"Signals >= 75%%      : {sig['independent_resolved']} resolved, hit {sig['independent_hit_rate'] if sig['independent_hit_rate'] is not None else 'n/a'}")
