@@ -82,6 +82,19 @@ def main(argv: list[str] | None = None) -> int:
     outcomes = dataset.frame.sort_values("timestamp").reset_index(drop=True)["outcome"].to_numpy(dtype=object)[ends[val_end:]]
     durations = dataset.frame.sort_values("timestamp").reset_index(drop=True)["resolve_periods"].to_numpy(dtype=int)[ends[val_end:]]
     metrics = barrier_metrics(outcomes, p, durations)
+    test_timestamps = dataset.frame.sort_values("timestamp").reset_index(drop=True)["timestamp"].iloc[ends[val_end:]]
+    evaluation_windows = []
+    for number, indices in enumerate(np.array_split(np.arange(len(p)), 5), start=1):
+        if len(indices) == 0:
+            continue
+        window = barrier_metrics(outcomes[indices], p[indices], durations[indices])
+        window.update(
+            fold=number,
+            rows=int(len(indices)),
+            test_start=test_timestamps.iloc[indices[0]].isoformat(),
+            test_end=test_timestamps.iloc[indices[-1]].isoformat(),
+        )
+        evaluation_windows.append(window)
     key = "0.75"
     sig = metrics["signals"][key]
     print(f"PyTorch GRU barrier: ±{config.threshold:.0%} within {config.max_horizon}, status shadow")
@@ -109,6 +122,7 @@ def main(argv: list[str] | None = None) -> int:
             "status": "shadow", "feature_columns": dataset.feature_columns, "feature_pipeline_version": "1.0",
             "feature_config": dataset.feature_config.to_dict(), "sequence_length": args.sequence_length,
             "dataset": dataset.describe(), "metrics": {"test": metrics}, "test": metrics,
+            "evaluation_windows": evaluation_windows,
             "training": model.training_info(), "params": model.params(), "code_version": git_revision(),
             "environment": environment_info(),
         }, model_type="pytorch_gru_barrier_direction")
