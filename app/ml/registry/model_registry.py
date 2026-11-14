@@ -24,6 +24,7 @@ from app.ml.models.baselines import HistoricalMeanBaseline, RidgeBaseline, ZeroR
 from app.ml.models.direction_model import XGBoostDirectionModel
 from app.ml.models.neutral_direction_model import XGBoostNeutralDirectionModel
 from app.ml.models.quantile_model import HistoricalQuantileBaseline, XGBoostQuantileModel
+from app.ml.models.pytorch_gru_model import PyTorchGRUDirectionModel
 from app.ml.models.xgboost_model import XGBoostReturnModel
 
 MODEL_TYPES: dict[str, type[ReturnModel]] = {
@@ -37,6 +38,7 @@ MODEL_TYPES: dict[str, type[ReturnModel]] = {
         HistoricalQuantileBaseline,
         XGBoostDirectionModel,
         XGBoostNeutralDirectionModel,
+        PyTorchGRUDirectionModel,
     )
 }
 MODEL_TYPES["xgboost_direction_v2"] = XGBoostDirectionModel

@@ -25,9 +25,9 @@ _lock = threading.Lock()
 
 
 class OperationRequest(BaseModel):
-    action: Literal["status", "train_direction", "walk_forward", "regime_report", "train_barrier"]
+    action: Literal["status", "train_direction", "walk_forward", "regime_report", "train_barrier", "train_pytorch"]
     horizon: Literal["24h", "7d"] = "24h"
-    feature_set: Literal["v1", "v2_funding_basis", "v3_open_interest"] = "v1"
+    feature_set: Literal["v1", "v2_funding_basis", "v3_open_interest", "pytorch_full_derivatives"] = "v1"
     # New logic (train_barrier): which configuration / feature set to train, or "all"
     barrier_config: str = "all"
     barrier_feature_set: str = "all"
@@ -77,6 +77,8 @@ def _command(request: OperationRequest) -> list[str]:
         return ["scripts/walk_forward_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
     if request.action == "train_barrier":
         return ["scripts/train_barrier_models.py", "--config", request.barrier_config, "--feature-set", request.barrier_feature_set]
+    if request.action == "train_pytorch":
+        return ["scripts/train_pytorch_model.py", "--horizon", request.horizon, "--shadow-only"]
     return ["scripts/regime_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
 
 
@@ -135,7 +137,7 @@ def run_operation(
             "job_id": job_id,
             "action": request.action,
             "horizon": request.horizon,
-            "feature_set": request.feature_set,
+            "feature_set": "pytorch_full_derivatives" if request.action == "train_pytorch" else request.feature_set,
             "barrier_config": request.barrier_config if request.action == "train_barrier" else None,
             "barrier_feature_set": request.barrier_feature_set if request.action == "train_barrier" else None,
             "status": "running",
