@@ -1,0 +1,886 @@
+{
+  "model_id": "barrier-move-3pct-168h-candles-btcusdt-1h-20261114-091157",
+  "model_type": "xgboost_barrier_direction",
+  "trained_at": "2026-11-14T09:11:57.366703+00:00",
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "logic": "barrier",
+  "horizon": "168h",
+  "barrier": {
+    "key": "move_3pct_168h",
+    "threshold": 0.03,
+    "max_horizon": "168h",
+    "label": "±3% в течение 7 дней"
+  },
+  "max_periods": 168,
+  "feature_set": "candles",
+  "feature_set_label": "только свечи",
+  "variant": "move_3pct_168h:candles",
+  "status": "shadow",
+  "signal_threshold": 0.75,
+  "gate": {
+    "passed": false,
+    "threshold": 0.75,
+    "criteria": {
+      "min_independent_signals": 77,
+      "min_hit_rate": 0.75,
+      "min_hit_rate_lower_95": 0.7
+    },
+    "reasons": [
+      "only 13 independent resolved signals >= 75% (need 77)",
+      "hit rate 61.5% below 75%",
+      "95% lower bound 35.5% below 70%"
+    ],
+    "progress": {
+      "independent_signals": 0.16883116883116883,
+      "hit_rate": 0.8205128205128206,
+      "hit_rate_lower_95": 0.5074640138895508
+    }
+  },
+  "walk_forward": {
+    "folds": 5,
+    "by_fold": [
+      {
+        "n": 6358,
+        "n_resolved": 5839,
+        "resolved_share": 0.9183705567788613,
+        "none_share": 0.08115759672853098,
+        "both_share": 0.0004718464926077383,
+        "max_confidence": 0.5768555700778961,
+        "base_rate_up": 0.513272820688474,
+        "accuracy": 0.4867271793115259,
+        "majority_baseline_accuracy": 0.513272820688474,
+        "brier": 0.2578607370146944,
+        "brier_base_rate": 0.24982383223097163,
+        "brier_skill": -0.032170288606782504,
+        "signals": {
+          "0.60": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.65": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.70": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.75": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.80": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          }
+        },
+        "fold": 1,
+        "rows": 6358,
+        "test_start": "2022-07-01T03:00:00+00:00",
+        "test_end": "2023-03-23T00:00:00+00:00"
+      },
+      {
+        "n": 6358,
+        "n_resolved": 5731,
+        "resolved_share": 0.9013840830449827,
+        "none_share": 0.0986159169550173,
+        "both_share": 0.0,
+        "max_confidence": 0.7866544127464294,
+        "base_rate_up": 0.5327168033502007,
+        "accuracy": 0.5309719071715233,
+        "majority_baseline_accuracy": 0.5327168033502007,
+        "brier": 0.24703754169321993,
+        "brier_base_rate": 0.24892961077854434,
+        "brier_skill": 0.007600819683149962,
+        "signals": {
+          "0.60": {
+            "signals": 2080,
+            "share_of_time": 0.3271469015413652,
+            "hit_rate": 0.6065662002152853,
+            "unresolved_share": 0.10673076923076923,
+            "independent_signals": 61,
+            "independent_resolved": 57,
+            "independent_hits": 33,
+            "independent_hit_rate": 0.5789473684210527,
+            "hit_rate_lower_95": 0.44979910140681373,
+            "independent_none": 4,
+            "independent_both": 0
+          },
+          "0.65": {
+            "signals": 1309,
+            "share_of_time": 0.20588235294117646,
+            "hit_rate": 0.691768826619965,
+            "unresolved_share": 0.12757830404889228,
+            "independent_signals": 37,
+            "independent_resolved": 34,
+            "independent_hits": 22,
+            "independent_hit_rate": 0.6470588235294118,
+            "hit_rate_lower_95": 0.4791365883001342,
+            "independent_none": 3,
+            "independent_both": 0
+          },
+          "0.70": {
+            "signals": 814,
+            "share_of_time": 0.12802768166089964,
+            "hit_rate": 0.6618075801749271,
+            "unresolved_share": 0.15724815724815724,
+            "independent_signals": 26,
+            "independent_resolved": 25,
+            "independent_hits": 17,
+            "independent_hit_rate": 0.68,
+            "hit_rate_lower_95": 0.48409913734576715,
+            "independent_none": 1,
+            "independent_both": 0
+          },
+          "0.75": {
+            "signals": 306,
+            "share_of_time": 0.0481283422459893,
+            "hit_rate": 0.6405529953917051,
+            "unresolved_share": 0.2908496732026144,
+            "independent_signals": 14,
+            "independent_resolved": 13,
+            "independent_hits": 8,
+            "independent_hit_rate": 0.6153846153846154,
+            "hit_rate_lower_95": 0.3552248097226855,
+            "independent_none": 1,
+            "independent_both": 0
+          },
+          "0.80": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          }
+        },
+        "fold": 2,
+        "rows": 6358,
+        "test_start": "2023-03-23T01:00:00+00:00",
+        "test_end": "2023-12-20T00:00:00+00:00"
+      },
+      {
+        "n": 6358,
+        "n_resolved": 6226,
+        "resolved_share": 0.9792387543252595,
+        "none_share": 0.019502988361119848,
+        "both_share": 0.0012582573136206354,
+        "max_confidence": 0.6199964284896851,
+        "base_rate_up": 0.49951814969482816,
+        "accuracy": 0.49951814969482816,
+        "majority_baseline_accuracy": 0.5004818503051718,
+        "brier": 0.2618444357065201,
+        "brier_base_rate": 0.24999976782028335,
+        "brier_skill": -0.04737871554645401,
+        "signals": {
+          "0.60": {
+            "signals": 6358,
+            "share_of_time": 1.0,
+            "hit_rate": 0.49951814969482816,
+            "unresolved_share": 0.020761245674740483,
+            "independent_signals": 207,
+            "independent_resolved": 206,
+            "independent_hits": 106,
+            "independent_hit_rate": 0.5145631067961165,
+            "hit_rate_lower_95": 0.44667273018377773,
+            "independent_none": 1,
+            "independent_both": 0
+          },
+          "0.65": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.70": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.75": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.80": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          }
+        },
+        "fold": 3,
+        "rows": 6358,
+        "test_start": "2023-12-20T01:00:00+00:00",
+        "test_end": "2024-09-09T22:00:00+00:00"
+      },
+      {
+        "n": 6358,
+        "n_resolved": 6151,
+        "resolved_share": 0.9674425920100661,
+        "none_share": 0.03224284366152878,
+        "both_share": 0.00031456432840515884,
+        "max_confidence": 0.5554381310939789,
+        "base_rate_up": 0.539912209396846,
+        "accuracy": 0.46008779060315397,
+        "majority_baseline_accuracy": 0.539912209396846,
+        "brier": 0.253809052403232,
+        "brier_base_rate": 0.24840701554106234,
+        "brier_skill": -0.021746716172259983,
+        "signals": {
+          "0.60": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.65": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.70": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.75": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.80": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          }
+        },
+        "fold": 4,
+        "rows": 6358,
+        "test_start": "2024-09-09T23:00:00+00:00",
+        "test_end": "2025-06-01T20:00:00+00:00"
+      },
+      {
+        "n": 6358,
+        "n_resolved": 5801,
+        "resolved_share": 0.9123938345391632,
+        "none_share": 0.08760616546083674,
+        "both_share": 0.0,
+        "max_confidence": 0.5601914525032043,
+        "base_rate_up": 0.46647129805206,
+        "accuracy": 0.4480262023789002,
+        "majority_baseline_accuracy": 0.53352870194794,
+        "brier": 0.2547210691862359,
+        "brier_base_rate": 0.24887582614568615,
+        "brier_skill": -0.023486584177637493,
+        "signals": {
+          "0.60": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.65": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.70": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.75": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          },
+          "0.80": {
+            "signals": 0,
+            "share_of_time": 0.0,
+            "hit_rate": null,
+            "unresolved_share": null,
+            "independent_signals": 0,
+            "independent_resolved": 0,
+            "independent_hits": 0,
+            "independent_hit_rate": null,
+            "hit_rate_lower_95": null,
+            "independent_none": 0,
+            "independent_both": 0
+          }
+        },
+        "fold": 5,
+        "rows": 6358,
+        "test_start": "2025-06-01T21:00:00+00:00",
+        "test_end": "2026-02-21T18:00:00+00:00"
+      }
+    ],
+    "brier_skill_by_fold": [
+      -0.032170288606782504,
+      0.007600819683149962,
+      -0.04737871554645401,
+      -0.021746716172259983,
+      -0.023486584177637493
+    ],
+    "brier_skill_mean": -0.023436296963996805,
+    "positive_folds": 1,
+    "accuracy_by_fold": [
+      0.4867271793115259,
+      0.5309719071715233,
+      0.49951814969482816,
+      0.46008779060315397,
+      0.4480262023789002
+    ],
+    "resolved_share": 0.9357659641396665,
+    "max_confidence": 0.7866544127464294,
+    "required_positive_folds": 4,
+    "has_skill": false,
+    "criteria": {
+      "folds": 5,
+      "min_positive_folds": 4
+    },
+    "pooled_signals": {
+      "0.60": {
+        "threshold": 0.6,
+        "signals": 8438,
+        "independent_signals": 268,
+        "independent_resolved": 263,
+        "independent_hits": 139,
+        "independent_hit_rate": 0.5285171102661597,
+        "hit_rate_lower_95": 0.4682099856723953,
+        "independent_none": 5,
+        "unresolved_share": 0.018656716417910446
+      },
+      "0.65": {
+        "threshold": 0.65,
+        "signals": 1309,
+        "independent_signals": 37,
+        "independent_resolved": 34,
+        "independent_hits": 22,
+        "independent_hit_rate": 0.6470588235294118,
+        "hit_rate_lower_95": 0.4791365883001342,
+        "independent_none": 3,
+        "unresolved_share": 0.08108108108108109
+      },
+      "0.70": {
+        "threshold": 0.7,
+        "signals": 814,
+        "independent_signals": 26,
+        "independent_resolved": 25,
+        "independent_hits": 17,
+        "independent_hit_rate": 0.68,
+        "hit_rate_lower_95": 0.48409913734576715,
+        "independent_none": 1,
+        "unresolved_share": 0.038461538461538464
+      },
+      "0.75": {
+        "threshold": 0.75,
+        "signals": 306,
+        "independent_signals": 14,
+        "independent_resolved": 13,
+        "independent_hits": 8,
+        "independent_hit_rate": 0.6153846153846154,
+        "hit_rate_lower_95": 0.3552248097226855,
+        "independent_none": 1,
+        "unresolved_share": 0.07142857142857142
+      },
+      "0.80": {
+        "threshold": 0.8,
+        "signals": 0,
+        "independent_signals": 0,
+        "independent_resolved": 0,
+        "independent_hits": 0,
+        "independent_hit_rate": null,
+        "hit_rate_lower_95": null,
+        "independent_none": 0,
+        "unresolved_share": null
+      }
+    },
+    "gate": {
+      "passed": false,
+      "threshold": 0.75,
+      "criteria": {
+        "min_independent_signals": 77,
+        "min_hit_rate": 0.75,
+        "min_hit_rate_lower_95": 0.7
+      },
+      "reasons": [
+        "only 13 independent resolved signals >= 75% (need 77)",
+        "hit rate 61.5% below 75%",
+        "95% lower bound 35.5% below 70%"
+      ],
+      "progress": {
+        "independent_signals": 0.16883116883116883,
+        "hit_rate": 0.8205128205128206,
+        "hit_rate_lower_95": 0.5074640138895508
+      }
+    }
+  },
+  "feature_columns": [
+    "log_return_1",
+    "log_return_3",
+    "log_return_6",
+    "log_return_12",
+    "log_return_24",
+    "log_return_72",
+    "log_return_168",
+    "close_to_sma_24",
+    "close_to_sma_72",
+    "close_to_sma_168",
+    "sma_24_change_24",
+    "close_to_ema_12",
+    "ema_12_to_ema_26",
+    "rsi_14",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "volatility_24",
+    "volatility_168",
+    "volatility_ratio_24_168",
+    "candle_range_pct",
+    "atr_14_pct",
+    "volume_change_1",
+    "volume_ratio_24",
+    "volume_ratio_168",
+    "volume_zscore_168",
+    "taker_buy_ratio",
+    "hour_sin",
+    "hour_cos",
+    "weekday_sin",
+    "weekday_cos"
+  ],
+  "feature_pipeline_version": "1.0",
+  "feature_config": {
+    "return_windows": [
+      1,
+      3,
+      6,
+      12,
+      24,
+      72,
+      168
+    ],
+    "sma_windows": [
+      24,
+      72,
+      168
+    ],
+    "sma_change_window": 24,
+    "ema_fast": 12,
+    "ema_slow": 26,
+    "macd_signal": 9,
+    "rsi_window": 14,
+    "atr_window": 14,
+    "volatility_windows": [
+      24,
+      168
+    ],
+    "volume_windows": [
+      24,
+      168
+    ],
+    "time_features": true,
+    "derivatives": []
+  },
+  "dataset": {
+    "feature_pipeline_version": "1.0",
+    "interval": "1h",
+    "barrier": {
+      "key": "move_3pct_168h",
+      "threshold": 0.03,
+      "max_horizon": "168h",
+      "label": "±3% в течение 7 дней"
+    },
+    "max_periods": 168,
+    "feature_set": "candles",
+    "rows": 76304,
+    "rows_dropped": 4597,
+    "labeled_rows": 73050,
+    "outcome_shares": {
+      "up": 0.4853873977773118,
+      "down": 0.4719673935835605,
+      "both": 0.0010746487733277416,
+      "none": 0.04157055986579996
+    },
+    "first_timestamp": "2017-08-24T04:00:00+00:00",
+    "last_timestamp": "2026-11-13T20:00:00+00:00"
+  },
+  "split": {
+    "gap": "7 days 00:00:00",
+    "train": {
+      "rows": 49429,
+      "start": "2017-08-24T04:00:00+00:00",
+      "end": "2023-10-21T01:00:00+00:00"
+    },
+    "validation": {
+      "rows": 15093,
+      "start": "2023-10-28T02:00:00+00:00",
+      "end": "2025-07-17T22:00:00+00:00"
+    },
+    "test": {
+      "rows": 11446,
+      "start": "2025-07-24T23:00:00+00:00",
+      "end": "2026-11-13T20:00:00+00:00"
+    },
+    "early_stopping": {
+      "rows": 7546,
+      "start": "2023-10-28T02:00:00+00:00",
+      "end": "2024-09-06T11:00:00+00:00"
+    },
+    "calibration": {
+      "rows": 7379,
+      "start": "2024-09-13T12:00:00+00:00",
+      "end": "2025-07-17T22:00:00+00:00"
+    },
+    "fit_rows_resolved": {
+      "train": 47514,
+      "early_stopping": 7390,
+      "calibration": 6993
+    }
+  },
+  "metrics": {
+    "calibration": {
+      "n": 7379,
+      "n_resolved": 6993,
+      "resolved_share": 0.9476893888060712,
+      "none_share": 0.05203957175769074,
+      "both_share": 0.0002710394362379726,
+      "max_confidence": 0.5556451678276062,
+      "base_rate_up": 0.5441155441155441,
+      "accuracy": 0.5441155441155441,
+      "majority_baseline_accuracy": 0.5441155441155441,
+      "brier": 0.24802503508118534,
+      "brier_base_rate": 0.24805381876738958,
+      "brier_skill": 0.00011603806926763216,
+      "signals": {
+        "0.60": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.65": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.70": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.75": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.80": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        }
+      }
+    },
+    "test": {
+      "n": 11446,
+      "n_resolved": 10742,
+      "resolved_share": 0.9384937969596365,
+      "none_share": 0.061506203040363444,
+      "both_share": 0.0,
+      "max_confidence": 0.5617690086364746,
+      "base_rate_up": 0.46276298640849006,
+      "accuracy": 0.46276298640849006,
+      "majority_baseline_accuracy": 0.5372370135915099,
+      "brier": 0.2555189279976007,
+      "brier_base_rate": 0.24861340481878563,
+      "brier_skill": -0.0277761498172171,
+      "signals": {
+        "0.60": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.65": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.70": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.75": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        },
+        "0.80": {
+          "signals": 0,
+          "share_of_time": 0.0,
+          "hit_rate": null,
+          "unresolved_share": null,
+          "independent_signals": 0,
+          "independent_resolved": 0,
+          "independent_hits": 0,
+          "independent_hit_rate": null,
+          "hit_rate_lower_95": null,
+          "independent_none": 0,
+          "independent_both": 0
+        }
+      }
+    }
+  },
+  "training": {
+    "best_iteration": 31,
+    "calibrated": true,
+    "probability_shrinkage": 1.0
+  },
+  "params": {
+    "n_estimators": 2000,
+    "learning_rate": 0.02,
+    "max_depth": 3,
+    "min_child_weight": 100,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 5.0,
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "tree_method": "hist",
+    "early_stopping_rounds": 100,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "code_version": {
+    "commit": "1b588172568b4d33fa429327cbfcfe93c0caa87b",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.13.3",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1"
+  }
+}
