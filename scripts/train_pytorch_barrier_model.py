@@ -44,8 +44,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--symbol", default="BTCUSDT")
     parser.add_argument("--interval", default="1h")
     parser.add_argument("--config", default="move_1pct_24h", choices=("move_1pct_24h",))
-    parser.add_argument("--feature-set", default="all_data", choices=("all_data",))
-    parser.add_argument("--sequence-length", type=int, default=168)
+    parser.add_argument("--feature-set", default="all_data", choices=("all_data", "candles"))
+    parser.add_argument("--sequence-length", type=int, default=336, choices=(168, 336))
     parser.add_argument("--epochs", type=int, default=12)
     parser.add_argument("--no-save", action="store_true")
     parser.add_argument("--shadow-only", action="store_true")
@@ -75,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Not enough resolved rows for training: train={len(train_known)} validation={len(val_known)}", file=sys.stderr)
         return 1
 
-    model = PyTorchGRUDirectionModel(input_size=X.shape[-1])
+    model = PyTorchGRUDirectionModel(input_size=X.shape[-1], sequence_length=args.sequence_length)
     model.fit(X[train_known], labels[train_known], X[val_known], labels[val_known], epochs=args.epochs)
     p = model.predict_proba_up(X[val_end:])
     # Reconstruct outcomes for the test endpoints; barrier frame ordering is preserved.

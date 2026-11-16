@@ -13,10 +13,11 @@ from app.ml.models.base import ReturnModel
 class PyTorchGRUDirectionModel(ReturnModel):
     name = "pytorch_gru_direction"
 
-    def __init__(self, input_size: int = 1, hidden_size: int = 48, dropout: float = 0.20) -> None:
+    def __init__(self, input_size: int = 1, hidden_size: int = 48, dropout: float = 0.20, sequence_length: int = 168) -> None:
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.dropout = dropout
+        self.sequence_length = sequence_length
         self.mean_: np.ndarray | None = None
         self.std_: np.ndarray | None = None
         self._state: dict[str, Any] | None = None
@@ -113,10 +114,10 @@ class PyTorchGRUDirectionModel(ReturnModel):
         return self.predict_proba_up(X)
 
     def params(self) -> dict[str, Any]:
-        return {"input_size": self.input_size, "hidden_size": self.hidden_size, "dropout": self.dropout}
+        return {"input_size": self.input_size, "hidden_size": self.hidden_size, "dropout": self.dropout, "sequence_length": self.sequence_length}
 
     def training_info(self) -> dict[str, Any]:
-        return {"sequence_model": "GRU", "sequence_length": 168, "scaled_on_train_only": True}
+        return {"sequence_model": "GRU", "sequence_length": self.sequence_length, "scaled_on_train_only": True}
 
     def save(self, directory: Path) -> None:
         torch = self._torch_module()[0]

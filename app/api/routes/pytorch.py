@@ -93,11 +93,11 @@ def _summary(meta: dict[str, Any] | None) -> dict[str, Any] | None:
 
 @router.get("/overview")
 def overview(registry: Registry, barrier_registry: BarrierRegistry) -> dict[str, Any]:
-    pytorch = None
-    for meta in registry.list():
-        if meta.get("model_type") == "pytorch_gru_barrier_direction" and meta.get("symbol") == "BTCUSDT":
-            pytorch = meta
-            break
+    pytorch_meta = [
+        meta for meta in registry.list()
+        if meta.get("model_type") == "pytorch_gru_barrier_direction" and meta.get("symbol") == "BTCUSDT"
+    ]
+    pytorch_models = [_summary(meta) for meta in pytorch_meta[:4]]
     xgb = None
     for meta in barrier_registry.list():
         if (
@@ -110,6 +110,7 @@ def overview(registry: Registry, barrier_registry: BarrierRegistry) -> dict[str,
     return {
         "target": "Какой барьер будет достигнут первым: +1% или -1% в течение 24 часов",
         "feature_set": "свечи + funding + basis + open interest + DVOL",
-        "pytorch": _summary(pytorch),
+        "pytorch": pytorch_models[0] if pytorch_models else None,
+        "pytorch_models": pytorch_models,
         "xgboost": _summary(xgb),
     }

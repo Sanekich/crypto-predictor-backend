@@ -31,6 +31,8 @@ class OperationRequest(BaseModel):
     # New logic (train_barrier): which configuration / feature set to train, or "all"
     barrier_config: str = "all"
     barrier_feature_set: str = "all"
+    pytorch_feature_set: Literal["candles", "all_data"] = "all_data"
+    pytorch_sequence_length: Literal[168, 336] = 336
 
     @field_validator("barrier_config")
     @classmethod
@@ -78,7 +80,13 @@ def _command(request: OperationRequest) -> list[str]:
     if request.action == "train_barrier":
         return ["scripts/train_barrier_models.py", "--config", request.barrier_config, "--feature-set", request.barrier_feature_set]
     if request.action == "train_pytorch":
-        return ["scripts/train_pytorch_barrier_model.py", "--config", "move_1pct_24h", "--feature-set", "all_data", "--shadow-only"]
+        return [
+            "scripts/train_pytorch_barrier_model.py",
+            "--config", "move_1pct_24h",
+            "--feature-set", request.pytorch_feature_set,
+            "--sequence-length", str(request.pytorch_sequence_length),
+            "--shadow-only",
+        ]
     return ["scripts/regime_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
 
 
@@ -137,7 +145,7 @@ def run_operation(
             "job_id": job_id,
             "action": request.action,
             "horizon": request.horizon,
-            "feature_set": "pytorch_full_derivatives" if request.action == "train_pytorch" else request.feature_set,
+            "feature_set": (f"pytorch_{request.pytorch_feature_set}_{request.pytorch_sequence_length}h" if request.action == "train_pytorch" else request.feature_set),
             "barrier_config": request.barrier_config if request.action == "train_barrier" else None,
             "barrier_feature_set": request.barrier_feature_set if request.action == "train_barrier" else None,
             "status": "running",
