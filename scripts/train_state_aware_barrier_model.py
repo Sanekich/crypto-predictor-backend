@@ -22,6 +22,8 @@ from app.ml.experiments.state_features import build_state_features  # noqa: E402
 from app.ml.registry.model_registry import ModelRegistry  # noqa: E402
 
 MODEL_TYPE = "xgboost_state_aware_barrier"
+ASCII_TARGET_LABELS = {"move_1pct_24h": "+/-1% within 24h"}
+ASCII_FEATURE_LABELS = {"candles": "candles", "all_data": "candles + derivatives"}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -58,8 +60,8 @@ def main(argv: list[str] | None = None) -> int:
     wf = result.walk_forward
     pooled = wf.get("pooled_signals", {}).get("0.75", {})
     print("State-aware barrier: causal regime/shock features, status shadow")
-    print(f"Target              : {BARRIER_CONFIGS[args.config].label}")
-    print(f"Feature set         : {FEATURE_SET_LABELS[args.feature_set]} + state/shock")
+    print(f"Target              : {ASCII_TARGET_LABELS[args.config]}")
+    print(f"Feature set         : {ASCII_FEATURE_LABELS[args.feature_set]} + state/shock")
     print(f"Rows                : {len(dataset.frame)} ({len(dataset.feature_columns)} features)")
     print(f"Test accuracy       : {test['accuracy']:.1%} (majority {test['majority_baseline_accuracy']:.1%})" if test["accuracy"] is not None else "Test accuracy       : n/a")
     print(f"Walk-forward skill  : {wf['brier_skill_mean']:+.4f} ({wf['positive_folds']}/{wf['folds']} positive folds)" if wf["brier_skill_mean"] is not None else "Walk-forward skill  : n/a")
