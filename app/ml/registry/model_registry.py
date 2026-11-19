@@ -25,6 +25,7 @@ from app.ml.models.direction_model import XGBoostDirectionModel
 from app.ml.models.neutral_direction_model import XGBoostNeutralDirectionModel
 from app.ml.models.quantile_model import HistoricalQuantileBaseline, XGBoostQuantileModel
 from app.ml.models.pytorch_gru_model import PyTorchGRUDirectionModel
+from app.ml.models.meta_accept_skip_model import MetaAcceptSkipModel
 from app.ml.models.xgboost_model import XGBoostReturnModel
 
 MODEL_TYPES: dict[str, type[ReturnModel]] = {
@@ -48,6 +49,7 @@ MODEL_TYPES["xgboost_barrier_direction"] = XGBoostDirectionModel
 MODEL_TYPES["pytorch_gru_barrier_direction"] = PyTorchGRUDirectionModel
 # Isolated experiment: causal state/shock features, stored under artifacts/experiments.
 MODEL_TYPES["xgboost_state_aware_barrier"] = XGBoostDirectionModel
+MODEL_TYPES["xgboost_meta_accept_skip"] = MetaAcceptSkipModel
 
 _SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 

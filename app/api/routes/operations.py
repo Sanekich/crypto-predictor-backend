@@ -25,7 +25,7 @@ _lock = threading.Lock()
 
 
 class OperationRequest(BaseModel):
-    action: Literal["status", "train_direction", "walk_forward", "regime_report", "train_barrier", "train_pytorch", "train_state_barrier"]
+    action: Literal["status", "train_direction", "walk_forward", "regime_report", "train_barrier", "train_pytorch", "train_state_barrier", "train_meta_label"]
     horizon: Literal["24h", "7d"] = "24h"
     feature_set: Literal["v1", "v2_funding_basis", "v3_open_interest", "pytorch_full_derivatives"] = "v1"
     # New logic (train_barrier): which configuration / feature set to train, or "all"
@@ -94,6 +94,12 @@ def _command(request: OperationRequest) -> list[str]:
             "--feature-set", request.barrier_feature_set if request.barrier_feature_set in ("candles", "all_data") else "candles",
             "--shadow-only",
         ]
+    if request.action == "train_meta_label":
+        return [
+            "scripts/train_meta_accept_skip_model.py",
+            "--feature-set", request.barrier_feature_set if request.barrier_feature_set in ("candles", "all_data") else "candles",
+            "--shadow-only",
+        ]
     return ["scripts/regime_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
 
 
@@ -152,7 +158,7 @@ def run_operation(
             "job_id": job_id,
             "action": request.action,
             "horizon": request.horizon,
-            "feature_set": (f"pytorch_{request.pytorch_feature_set}_{request.pytorch_sequence_length}h" if request.action == "train_pytorch" else f"state_barrier_{request.barrier_feature_set}" if request.action == "train_state_barrier" else request.feature_set),
+            "feature_set": (f"pytorch_{request.pytorch_feature_set}_{request.pytorch_sequence_length}h" if request.action == "train_pytorch" else f"state_barrier_{request.barrier_feature_set}" if request.action == "train_state_barrier" else f"meta_accept_skip_{request.barrier_feature_set}" if request.action == "train_meta_label" else request.feature_set),
             "barrier_config": request.barrier_config if request.action == "train_barrier" else None,
             "barrier_feature_set": request.barrier_feature_set if request.action == "train_barrier" else None,
             "status": "running",
