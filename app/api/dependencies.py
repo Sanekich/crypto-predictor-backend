@@ -31,6 +31,12 @@ def get_barrier_registry() -> ModelRegistry:
 
 
 @lru_cache
+def get_experiment_registry() -> ModelRegistry:
+    """Isolated shadow experiments: artifacts/models/experiments."""
+    return ModelRegistry(_resolve(get_settings().model_artifacts_dir) / "experiments")
+
+
+@lru_cache
 def get_market_data_service() -> MarketDataService:
     settings = get_settings()
     return MarketDataService(
