@@ -10,17 +10,18 @@ from typing import Annotated, Any, Literal
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from app.api.dependencies import _resolve, get_barrier_registry, get_experiment_registry, get_market_data_service, get_registry
-from app.api.routes.operations import _check_token
+from app.api.dependencies import _resolve, get_barrier_registry, get_experiment_registry, get_market_data_service, get_registry, get_signal_service
 from app.core.config import get_settings
 from app.ml.registry.model_registry import ModelRegistry
 from app.services.market_data_service import MarketDataService
+from app.services.signal_service import SignalService
 
 router = APIRouter(prefix="/paper-trading", tags=["paper-trading"])
 Registry = Annotated[ModelRegistry, Depends(get_registry)]
 BarrierRegistry = Annotated[ModelRegistry, Depends(get_barrier_registry)]
 ExperimentRegistry = Annotated[ModelRegistry, Depends(get_experiment_registry)]
 MarketData = Annotated[MarketDataService, Depends(get_market_data_service)]
+Signal = Annotated[SignalService, Depends(get_signal_service)]
 _lock = threading.Lock()
 STARTING_BALANCE = 10000.0
 
@@ -30,7 +31,7 @@ def _path() -> Path:
 
 
 def _empty() -> dict[str, Any]:
-    return {"wallets": {}}
+    return {"wallets": {}, "controller": {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60}}
 
 
 def _load() -> dict[str, Any]:
@@ -38,6 +39,7 @@ def _load() -> dict[str, Any]:
     if not path.exists():
         return _empty()
     data = json.loads(path.read_text(encoding="utf-8"))
+    data.setdefault("controller", {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60})
     if "wallets" in data:
         return data
     # One-time migration from the previous shared-wallet format.
@@ -46,7 +48,7 @@ def _load() -> dict[str, Any]:
         wallets.setdefault(trade["model_id"], {"initial_balance": STARTING_BALANCE, "cash": STARTING_BALANCE, "position": None, "trades": []})["trades"].append(trade)
     for model_id, position in data.get("positions", {}).items():
         wallets.setdefault(model_id, {"initial_balance": STARTING_BALANCE, "cash": STARTING_BALANCE, "position": None, "trades": []})["position"] = position
-    return {"wallets": wallets}
+    return {"wallets": wallets, "controller": {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60}}
 
 
 def _save(value: dict[str, Any]) -> None:
@@ -123,7 +125,50 @@ def _overview(data: dict[str, Any], current_price: float, models: list[dict[str,
     equity = sum(model["wallet"]["equity"] for model in model_views)
     initial = sum(model["wallet"]["initial_balance"] for model in model_views)
     cash = sum(model["wallet"]["cash"] for model in model_views)
-    return {"initial_balance": initial, "cash": cash, "equity": equity, "realized_pnl": sum(m["wallet"]["realized_pnl"] for m in model_views), "unrealized_pnl": sum(m["wallet"]["unrealized_pnl"] for m in model_views), "return_pct": equity / initial - 1.0 if initial else 0.0, "current_price": current_price, "models": model_views, "virtual_only": True}
+    return {"initial_balance": initial, "cash": cash, "equity": equity, "realized_pnl": sum(m["wallet"]["realized_pnl"] for m in model_views), "unrealized_pnl": sum(m["wallet"]["unrealized_pnl"] for m in model_views), "return_pct": equity / initial - 1.0 if initial else 0.0, "current_price": current_price, "models": model_views, "controller": data.get("controller", {}), "virtual_only": True}
+
+
+def _close_wallet(wallet: dict[str, Any], model_id: str, price: float, reason: str) -> float:
+    position = wallet.get("position")
+    if position is None:
+        return 0.0
+    move = price / position["entry_price"] - 1.0
+    pnl = position["notional"] * (move if position["side"] == "long" else -move)
+    wallet["cash"] += position["notional"] + pnl
+    wallet["trades"].append({"model_id": model_id, **position, "exit_price": price, "pnl": pnl, "reason": reason, "closed_at": datetime.now(timezone.utc).isoformat()})
+    wallet["position"] = None
+    return pnl
+
+
+def _controller_tick(data: dict[str, Any], models: list[dict[str, Any]], price: float, signal_service: SignalService) -> None:
+    controller = data.setdefault("controller", {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60})
+    if not controller.get("enabled"):
+        return
+    threshold = float(controller.get("threshold", 0.60))
+    promising_ids = {m["model_id"] for m in models if m.get("promising") and m.get("model_type") == "xgboost_direction"}
+    actions: list[str] = []
+    try:
+        signals = signal_service.get_signals("BTCUSDT", threshold=threshold)
+        for signal in signals.horizons:
+            if signal.model_version not in promising_ids or signal.confidence < threshold:
+                continue
+            wallet = _wallet(data, signal.model_version)
+            position = wallet.get("position")
+            desired = "long" if signal.direction == "up" else "short"
+            if position and position["side"] != desired:
+                pnl = _close_wallet(wallet, signal.model_version, price, "opposite_signal")
+                actions.append(f"close {signal.horizon} {pnl:+.2f}")
+                position = None
+            if position is None:
+                notional = min(wallet["cash"] * 0.10, wallet["cash"])
+                if notional > 10:
+                    wallet["cash"] -= notional
+                    wallet["position"] = {"side": desired, "notional": notional, "entry_price": price, "opened_at": datetime.now(timezone.utc).isoformat()}
+                    actions.append(f"open {signal.horizon} {desired} {signal.confidence:.0%}")
+        controller["last_action"] = "; ".join(actions) if actions else "no qualifying signal"
+    except Exception as exc:  # controller must never stop the API
+        controller["last_action"] = f"signal unavailable: {type(exc).__name__}"
+    controller["last_tick"] = datetime.now(timezone.utc).isoformat()
 
 
 class TradeRequest(BaseModel):
@@ -133,14 +178,18 @@ class TradeRequest(BaseModel):
 
 
 @router.get("/overview")
-def overview(registry: Registry, barrier: BarrierRegistry, experiments: ExperimentRegistry, market: MarketData) -> dict[str, Any]:
+def overview(registry: Registry, barrier: BarrierRegistry, experiments: ExperimentRegistry, market: MarketData, signal_service: Signal) -> dict[str, Any]:
     with _lock:
-        return _overview(_load(), _price(market), _models(registry, barrier, experiments))
+        data = _load()
+        models = _models(registry, barrier, experiments)
+        price = _price(market)
+        _controller_tick(data, models, price, signal_service)
+        _save(data)
+        return _overview(data, price, models)
 
 
 @router.post("/trade")
-def open_trade(request: TradeRequest, registry: Registry, barrier: BarrierRegistry, experiments: ExperimentRegistry, market: MarketData, x_operations_token: str | None = Header(default=None), x_operations_token_b64: str | None = Header(default=None)) -> dict[str, Any]:
-    _check_token(x_operations_token, x_operations_token_b64)
+def open_trade(request: TradeRequest, registry: Registry, barrier: BarrierRegistry, experiments: ExperimentRegistry, market: MarketData) -> dict[str, Any]:
     with _lock:
         data = _load()
         wallet = _wallet(data, request.model_id)
@@ -156,8 +205,7 @@ def open_trade(request: TradeRequest, registry: Registry, barrier: BarrierRegist
 
 
 @router.post("/close/{model_id}")
-def close_trade(model_id: str, registry: Registry, barrier: BarrierRegistry, experiments: ExperimentRegistry, market: MarketData, x_operations_token: str | None = Header(default=None), x_operations_token_b64: str | None = Header(default=None)) -> dict[str, Any]:
-    _check_token(x_operations_token, x_operations_token_b64)
+def close_trade(model_id: str, registry: Registry, barrier: BarrierRegistry, experiments: ExperimentRegistry, market: MarketData) -> dict[str, Any]:
     with _lock:
         data = _load()
         wallet = _wallet(data, model_id)
@@ -165,18 +213,28 @@ def close_trade(model_id: str, registry: Registry, barrier: BarrierRegistry, exp
         if position is None:
             raise HTTPException(status_code=404, detail="Позиция не найдена")
         price = _price(market)
-        move = price / position["entry_price"] - 1.0
-        pnl = position["notional"] * (move if position["side"] == "long" else -move)
-        wallet["cash"] += position["notional"] + pnl
-        wallet["trades"].append({"model_id": model_id, **position, "exit_price": price, "pnl": pnl, "closed_at": datetime.now(timezone.utc).isoformat()})
-        wallet["position"] = None
+        _close_wallet(wallet, model_id, price, "manual")
         _save(data)
         return _overview(data, price, _models(registry, barrier, experiments))
 
 
 @router.post("/reset")
-def reset_portfolio(x_operations_token: str | None = Header(default=None), x_operations_token_b64: str | None = Header(default=None)) -> dict[str, str]:
-    _check_token(x_operations_token, x_operations_token_b64)
+def reset_portfolio() -> dict[str, str]:
     with _lock:
         _save(_empty())
     return {"status": "reset", "balance_per_model": f"{STARTING_BALANCE:.2f}"}
+
+
+class ControllerRequest(BaseModel):
+    enabled: bool
+
+
+@router.post("/controller")
+def set_controller(request: ControllerRequest) -> dict[str, Any]:
+    with _lock:
+        data = _load()
+        controller = data.setdefault("controller", {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60})
+        controller["enabled"] = request.enabled
+        controller["last_action"] = "enabled; waiting for qualifying signal" if request.enabled else "off"
+        _save(data)
+        return controller
