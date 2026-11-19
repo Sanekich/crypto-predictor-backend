@@ -68,11 +68,29 @@ def _models(registry: ModelRegistry, barrier: ModelRegistry, experiments: ModelR
             latest[key] = meta
     result = []
     for meta in latest.values():
+        walk = meta.get("walk_forward") or {}
+        test = (meta.get("metrics") or {}).get("test") or {}
+        positive = walk.get("positive_folds")
+        folds = walk.get("folds")
+        skill = walk.get("brier_skill_mean")
+        if skill is None:
+            skill = walk.get("mean_brier_skill")
+        reasons: list[str] = []
+        if meta.get("status") == "approved":
+            reasons.append("approved")
+        if positive is not None and folds and positive / folds >= 0.6:
+            reasons.append(f"{positive}/{folds} positive folds")
+        if skill is not None and skill > 0:
+            reasons.append("positive walk-forward skill")
+        if test.get("accepted_accuracy") is not None and test.get("primary_accuracy") is not None and test["accepted_accuracy"] > test["primary_accuracy"]:
+            reasons.append("meta filter improves accepted accuracy")
+        promising = bool(meta.get("status") == "approved" or (positive is not None and folds and positive / folds >= 0.6 and (skill is None or skill >= 0)))
         result.append({
             "model_id": meta.get("model_id"), "model_type": meta.get("model_type"), "status": meta.get("status", "shadow"),
             "trained_at": meta.get("trained_at"), "symbol": meta.get("symbol", "BTCUSDT"), "interval": meta.get("interval", "1h"),
             "horizon": meta.get("horizon", "24h"), "feature_set_label": meta.get("feature_set_label", meta.get("feature_set", "")),
             "logic": meta.get("logic", "research"), "paper_enabled": True,
+            "promising": promising, "promise_reason": ", ".join(reasons) if reasons else "нет устойчивого преимущества пока",
         })
     return sorted(result, key=lambda row: (row["status"] != "approved", row["model_type"], row["trained_at"] or ""))
 
