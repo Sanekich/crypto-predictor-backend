@@ -46,6 +46,8 @@ MODEL_TYPES["xgboost_direction_v3"] = XGBoostDirectionModel
 # New logic (app/ml/barrier): same classifier, different target; stored in artifacts/barrier
 MODEL_TYPES["xgboost_barrier_direction"] = XGBoostDirectionModel
 MODEL_TYPES["pytorch_gru_barrier_direction"] = PyTorchGRUDirectionModel
+# Isolated experiment: causal state/shock features, stored under artifacts/experiments.
+MODEL_TYPES["xgboost_state_aware_barrier"] = XGBoostDirectionModel
 
 _SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 
