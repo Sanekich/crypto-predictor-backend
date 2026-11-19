@@ -92,6 +92,30 @@ def _state_forecasts(experiments: ModelRegistry, market: MarketData, models: lis
     return result
 
 
+def _barrier_forecasts(barrier: ModelRegistry, market: MarketData, models: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Run live inference for saved regular XGBoost barrier artifacts."""
+    result: dict[str, dict[str, Any]] = {}
+    candles = market.get_ohlcv("BTCUSDT", "1h")
+    data_dir = _resolve(get_settings().data_dir)
+    for card in models:
+        if card.get("model_type") != "xgboost_barrier_direction" or not card.get("promising"):
+            continue
+        try:
+            meta = barrier.metadata(card["model_id"])
+            config = FeatureConfig.from_dict(meta.get("feature_config") or {})
+            derivatives = DerivativesStore(data_dir).load_all("BTCUSDT") if meta.get("feature_set") == "all_data" else None
+            base = build_features(candles, meta.get("interval", "1h"), config, derivatives)
+            columns = meta.get("feature_columns") or feature_columns(base)
+            row = base.dropna(subset=columns).iloc[-1]
+            model, _ = barrier.load(card["model_id"])
+            p_up = float(model.predict_proba_up(row[columns].to_numpy(dtype="float64").reshape(1, -1))[0])
+            confidence = max(p_up, 1.0 - p_up)
+            result[card["model_id"]] = {"horizon": meta.get("horizon", "24h"), "direction": "up" if p_up >= 0.5 else "down", "p_up": p_up, "confidence": confidence, "is_signal": bool(confidence >= 0.60 and meta.get("walk_forward", {}).get("has_skill")), "has_skill": bool(meta.get("walk_forward", {}).get("has_skill")), "target_time": row["timestamp"].isoformat(), "status": meta.get("status", "shadow")}
+        except Exception:
+            continue
+    return result
+
+
 def _models(registry: ModelRegistry, barrier: ModelRegistry, experiments: ModelRegistry) -> list[dict[str, Any]]:
     all_meta = registry.list() + barrier.list() + experiments.list()
     latest: dict[tuple[str, str, str, str], dict[str, Any]] = {}
@@ -221,6 +245,7 @@ def overview(registry: Registry, barrier: BarrierRegistry, experiments: Experime
             signal_response = None
             forecasts = {}
         forecasts.update(_state_forecasts(experiments, market, models))
+        forecasts.update(_barrier_forecasts(barrier, market, models))
         _controller_tick(data, models, price, signal_service, signal_response)
         _save(data)
         return _overview(data, price, models, forecasts)
