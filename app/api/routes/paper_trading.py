@@ -116,10 +116,10 @@ def _wallet_view(wallet: dict[str, Any], current_price: float) -> dict[str, Any]
     return {"initial_balance": wallet["initial_balance"], "cash": wallet["cash"], "equity": equity, "realized_pnl": realized, "unrealized_pnl": unrealized, "return_pct": equity / wallet["initial_balance"] - 1.0, "position": view_position, "trades": wallet.get("trades", [])[-10:]}
 
 
-def _overview(data: dict[str, Any], current_price: float, models: list[dict[str, Any]]) -> dict[str, Any]:
+def _overview(data: dict[str, Any], current_price: float, models: list[dict[str, Any]], forecasts: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     model_views = []
     for model in models:
-        model_views.append({**model, "wallet": _wallet_view(_wallet(data, model["model_id"]), current_price)})
+        model_views.append({**model, "forecast": forecasts.get(model["model_id"]) if forecasts and model.get("promising") else None, "wallet": _wallet_view(_wallet(data, model["model_id"]), current_price)})
     if models:
         _save(data)
     equity = sum(model["wallet"]["equity"] for model in model_views)
@@ -140,7 +140,7 @@ def _close_wallet(wallet: dict[str, Any], model_id: str, price: float, reason: s
     return pnl
 
 
-def _controller_tick(data: dict[str, Any], models: list[dict[str, Any]], price: float, signal_service: SignalService) -> None:
+def _controller_tick(data: dict[str, Any], models: list[dict[str, Any]], price: float, signal_service: SignalService, signal_response: Any | None = None) -> None:
     controller = data.setdefault("controller", {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60})
     if not controller.get("enabled"):
         return
@@ -148,7 +148,7 @@ def _controller_tick(data: dict[str, Any], models: list[dict[str, Any]], price: 
     promising_ids = {m["model_id"] for m in models if m.get("promising") and m.get("model_type") == "xgboost_direction"}
     actions: list[str] = []
     try:
-        signals = signal_service.get_signals("BTCUSDT", threshold=threshold)
+        signals = signal_response or signal_service.get_signals("BTCUSDT", threshold=threshold)
         for signal in signals.horizons:
             if signal.model_version not in promising_ids or signal.confidence < threshold:
                 continue
@@ -183,9 +183,15 @@ def overview(registry: Registry, barrier: BarrierRegistry, experiments: Experime
         data = _load()
         models = _models(registry, barrier, experiments)
         price = _price(market)
-        _controller_tick(data, models, price, signal_service)
+        try:
+            signal_response = signal_service.get_signals("BTCUSDT", threshold=0.50)
+            forecasts = {item.model_version: {"horizon": item.horizon, "direction": item.direction, "p_up": item.p_up, "confidence": item.confidence, "is_signal": item.is_signal, "has_skill": item.has_skill, "target_time": item.target_time.isoformat(), "status": item.status} for item in signal_response.horizons}
+        except Exception:
+            signal_response = None
+            forecasts = {}
+        _controller_tick(data, models, price, signal_service, signal_response)
         _save(data)
-        return _overview(data, price, models)
+        return _overview(data, price, models, forecasts)
 
 
 @router.post("/trade")
