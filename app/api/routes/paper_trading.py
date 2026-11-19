@@ -12,6 +12,9 @@ from pydantic import BaseModel, Field
 
 from app.api.dependencies import _resolve, get_barrier_registry, get_experiment_registry, get_market_data_service, get_registry, get_signal_service
 from app.core.config import get_settings
+from app.data.derivatives.store import DerivativesStore
+from app.features.feature_pipeline import FeatureConfig, build_features, feature_columns
+from app.ml.experiments.state_features import build_state_features
 from app.ml.registry.model_registry import ModelRegistry
 from app.services.market_data_service import MarketDataService
 from app.services.signal_service import SignalService
@@ -59,6 +62,34 @@ def _save(value: dict[str, Any]) -> None:
 
 def _price(market: MarketData) -> float:
     return float(market.get_ohlcv("BTCUSDT", "1h").iloc[-1]["close"])
+
+
+def _state_forecasts(experiments: ModelRegistry, market: MarketData, models: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Infer only from saved state-aware artifacts; no fallback or guessed signal."""
+    result: dict[str, dict[str, Any]] = {}
+    candles = market.get_ohlcv("BTCUSDT", "1h")
+    data_dir = _resolve(get_settings().data_dir)
+    for card in models:
+        if card.get("model_type") != "xgboost_state_aware_barrier" or not card.get("promising"):
+            continue
+        try:
+            meta = experiments.metadata(card["model_id"])
+            config = FeatureConfig.from_dict(meta.get("feature_config") or {})
+            derivatives = None
+            if meta.get("feature_set") == "all_data":
+                derivatives = DerivativesStore(data_dir).load_all("BTCUSDT")
+            base = build_features(candles, "1h", config, derivatives)
+            state = build_state_features(base)
+            frame = base.join(state)
+            columns = meta.get("feature_columns") or [*feature_columns(base), *state.columns]
+            row = frame.dropna(subset=columns).iloc[-1]
+            model, _ = experiments.load(card["model_id"])
+            p_up = float(model.predict_proba_up(row[columns].to_numpy(dtype="float64").reshape(1, -1))[0])
+            confidence = max(p_up, 1.0 - p_up)
+            result[card["model_id"]] = {"horizon": meta.get("horizon", "24h"), "direction": "up" if p_up >= 0.5 else "down", "p_up": p_up, "confidence": confidence, "is_signal": bool(confidence >= 0.60 and meta.get("walk_forward", {}).get("has_skill")), "has_skill": bool(meta.get("walk_forward", {}).get("has_skill")), "target_time": row["timestamp"].isoformat(), "status": meta.get("status", "shadow")}
+        except Exception:
+            continue
+    return result
 
 
 def _models(registry: ModelRegistry, barrier: ModelRegistry, experiments: ModelRegistry) -> list[dict[str, Any]]:
@@ -189,6 +220,7 @@ def overview(registry: Registry, barrier: BarrierRegistry, experiments: Experime
         except Exception:
             signal_response = None
             forecasts = {}
+        forecasts.update(_state_forecasts(experiments, market, models))
         _controller_tick(data, models, price, signal_service, signal_response)
         _save(data)
         return _overview(data, price, models, forecasts)
