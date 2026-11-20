@@ -16,6 +16,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pandas as pd
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
@@ -39,6 +41,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--interval", default="1h", choices=list(INTERVAL_MS))
     parser.add_argument("--horizon", default="4h")
     parser.add_argument("--feature-set", choices=("v1", "v2_funding_basis", "v3_open_interest"), default="v1")
+    parser.add_argument("--start-date", help="Only use resolved examples on/after YYYY-MM-DD")
+    parser.add_argument("--exclude-recent-days", type=int, default=0, help="Exclude the newest N days from training/evaluation")
     parser.add_argument("--shadow-only", action="store_true", help="save the artifact only as shadow, never approved")
     parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args(argv)
@@ -56,6 +60,30 @@ def main(argv: list[str] | None = None) -> int:
     except (FileNotFoundError, ValueError) as exc:
         print(f"Cannot prepare {args.feature_set} dataset: {exc}", file=sys.stderr)
         return 1
+    if args.exclude_recent_days < 0:
+        print("--exclude-recent-days must be >= 0", file=sys.stderr)
+        return 1
+    original_rows = len(dataset.frame)
+    frame = dataset.frame
+    if args.start_date:
+        try:
+            start = pd.Timestamp(args.start_date)
+            start = start.tz_localize("UTC") if start.tzinfo is None else start.tz_convert("UTC")
+        except ValueError:
+            print("--start-date must be a valid YYYY-MM-DD date", file=sys.stderr)
+            return 1
+        frame = frame[frame["timestamp"] >= start]
+    cutoff = None
+    if args.exclude_recent_days:
+        cutoff = frame["timestamp"].max() - pd.Timedelta(days=args.exclude_recent_days)
+        frame = frame[frame["timestamp"] < cutoff]
+    if len(frame) < 1000:
+        print(f"Date window leaves only {len(frame)} rows; need at least 1000", file=sys.stderr)
+        return 1
+    dataset.frame = frame.reset_index(drop=True)
+    print(f"Date window          : {dataset.frame['timestamp'].iloc[0].date()} .. {dataset.frame['timestamp'].iloc[-1].date()} ({len(dataset.frame)} rows; {original_rows - len(dataset.frame)} excluded)")
+    if cutoff is not None:
+        print(f"Recent-data cutoff   : {cutoff.isoformat()}")
     gap = interval_to_timedelta(args.interval) * dataset.horizon_periods
     result = train_direction_model(
         dataset.frame, dataset.feature_columns, dataset.target_direction_column, dataset.horizon_periods, gap

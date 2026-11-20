@@ -33,6 +33,8 @@ class OperationRequest(BaseModel):
     barrier_feature_set: str = "all"
     pytorch_feature_set: Literal["candles", "all_data"] = "all_data"
     pytorch_sequence_length: Literal[168, 336] = 336
+    start_date: str | None = None
+    exclude_recent_days: int = Field(default=0, ge=0, le=3650)
 
     @field_validator("barrier_config")
     @classmethod
@@ -67,7 +69,7 @@ def _command(request: OperationRequest) -> list[str]:
     if request.action == "status":
         return ["scripts/status_report.py"]
     if request.action == "train_direction":
-        return [
+        command = [
             "scripts/train_direction_model.py",
             "--horizon",
             request.horizon,
@@ -75,6 +77,11 @@ def _command(request: OperationRequest) -> list[str]:
             request.feature_set,
             "--shadow-only",
         ]
+        if request.start_date:
+            command.extend(["--start-date", request.start_date])
+        if request.exclude_recent_days:
+            command.extend(["--exclude-recent-days", str(request.exclude_recent_days)])
+        return command
     if request.action == "walk_forward":
         return ["scripts/walk_forward_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
     if request.action == "train_barrier":
