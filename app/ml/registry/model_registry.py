@@ -10,6 +10,8 @@ A model must always be loaded together with its metadata: the feature list,
 their order and the feature pipeline version define what input it expects.
 """
 
+from __future__ import annotations
+
 import json
 import math
 import os
@@ -77,6 +79,7 @@ class ModelNotFoundError(LookupError):
 class ModelRegistry:
     def __init__(self, artifacts_dir: Path | str) -> None:
         self.models_dir = Path(artifacts_dir) / "models"
+        self.archive_dir = Path(artifacts_dir) / "archive" / "models"
 
     def _dir(self, model_id: str) -> Path:
         if not _SAFE_ID.match(model_id):
@@ -149,6 +152,52 @@ class ModelRegistry:
         if not (directory / "metadata.json").exists():
             raise ModelNotFoundError(model_id)
         shutil.rmtree(directory)
+
+    def archive_old(self, model_id: str, reason: str) -> dict[str, Any]:
+        """Move a historical model to a reversible archive and retain its metrics."""
+        meta = self.metadata(model_id)
+        if meta.get("status") == "approved":
+            raise ValueError("Approved models cannot be archived")
+        candidates = [
+            item for item in self.list()
+            if item.get("model_type") == meta.get("model_type")
+            and item.get("symbol") == meta.get("symbol")
+            and item.get("interval") == meta.get("interval")
+            and item.get("horizon") == meta.get("horizon")
+            and (not meta.get("variant") or item.get("variant") == meta.get("variant"))
+        ]
+        latest = max(candidates, key=lambda item: item.get("trained_at", ""), default=None)
+        if latest and latest.get("model_id") == model_id:
+            raise ValueError("The latest model version cannot be archived")
+        reason = reason.strip()
+        if len(reason) < 3:
+            raise ValueError("Archive reason must contain at least 3 characters")
+        archived_meta = {
+            **meta,
+            "archived_at": datetime.now(timezone.utc).isoformat(),
+            "archive_reason": reason,
+            "archive_source": str(self.models_dir),
+        }
+        source = self._dir(model_id)
+        destination = self.archive_dir / model_id
+        if destination.exists():
+            raise FileExistsError(f"Archived model {model_id} already exists")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        tmp_meta = source / "metadata.json.tmp"
+        tmp_meta.write_text(json.dumps(_json_safe(archived_meta), ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(tmp_meta, source / "metadata.json")
+        shutil.move(str(source), str(destination))
+        return archived_meta
+
+    def list_archived(self) -> list[dict[str, Any]]:
+        """Return archived metadata newest first without loading model weights."""
+        if not self.archive_dir.exists():
+            return []
+        items = []
+        for directory in self.archive_dir.iterdir():
+            if (directory / "metadata.json").exists():
+                items.append(json.loads((directory / "metadata.json").read_text(encoding="utf-8")))
+        return sorted(items, key=lambda m: m.get("archived_at", ""), reverse=True)
 
     def latest(self, model_type: str, symbol: str, interval: str, horizon: str) -> dict[str, Any] | None:
         """Metadata of the most recently trained matching model, or None."""
