@@ -1,0 +1,114 @@
+{
+  "direction": "4h old logic",
+  "volatility": "move_1pct_4h",
+  "rows": [
+    {
+      "top_share": 1.0,
+      "min_confidence": 0.5,
+      "independent_signals": 7965,
+      "hits": 4345,
+      "hit_rate": 0.5455116133082235,
+      "hit_rate_lower_95": 0.5345570911578359,
+      "mean_abs_return": 0.00654310085674295
+    },
+    {
+      "top_share": 1.0,
+      "min_confidence": 0.55,
+      "independent_signals": 3807,
+      "hits": 2134,
+      "hit_rate": 0.5605463619648017,
+      "hit_rate_lower_95": 0.5447269609757566,
+      "mean_abs_return": 0.006315476451845326
+    },
+    {
+      "top_share": 1.0,
+      "min_confidence": 0.6,
+      "independent_signals": 764,
+      "hits": 462,
+      "hit_rate": 0.6047120418848168,
+      "hit_rate_lower_95": 0.5696020882267389,
+      "mean_abs_return": 0.0063201061514436795
+    },
+    {
+      "top_share": 0.5,
+      "min_confidence": 0.5,
+      "independent_signals": 4204,
+      "hits": 2299,
+      "hit_rate": 0.54686013320647,
+      "hit_rate_lower_95": 0.5317761544885081,
+      "mean_abs_return": 0.008426502035741293
+    },
+    {
+      "top_share": 0.5,
+      "min_confidence": 0.55,
+      "independent_signals": 2074,
+      "hits": 1160,
+      "hit_rate": 0.5593056894889104,
+      "hit_rate_lower_95": 0.5378484492806066,
+      "mean_abs_return": 0.00810244442579025
+    },
+    {
+      "top_share": 0.5,
+      "min_confidence": 0.6,
+      "independent_signals": 520,
+      "hits": 304,
+      "hit_rate": 0.5846153846153846,
+      "hit_rate_lower_95": 0.5417899104665683,
+      "mean_abs_return": 0.007636447842499392
+    },
+    {
+      "top_share": 0.25,
+      "min_confidence": 0.5,
+      "independent_signals": 2334,
+      "hits": 1284,
+      "hit_rate": 0.5501285347043702,
+      "hit_rate_lower_95": 0.5298797582573829,
+      "mean_abs_return": 0.009902423952216284
+    },
+    {
+      "top_share": 0.25,
+      "min_confidence": 0.55,
+      "independent_signals": 1274,
+      "hits": 715,
+      "hit_rate": 0.5612244897959183,
+      "hit_rate_lower_95": 0.5338311529289598,
+      "mean_abs_return": 0.009187689949778644
+    },
+    {
+      "top_share": 0.25,
+      "min_confidence": 0.6,
+      "independent_signals": 372,
+      "hits": 215,
+      "hit_rate": 0.5779569892473119,
+      "hit_rate_lower_95": 0.5272217156638509,
+      "mean_abs_return": 0.008466989293024156
+    },
+    {
+      "top_share": 0.1,
+      "min_confidence": 0.5,
+      "independent_signals": 1118,
+      "hits": 581,
+      "hit_rate": 0.5196779964221825,
+      "hit_rate_lower_95": 0.4903741467255806,
+      "mean_abs_return": 0.011088784443384911
+    },
+    {
+      "top_share": 0.1,
+      "min_confidence": 0.55,
+      "independent_signals": 687,
+      "hits": 389,
+      "hit_rate": 0.5662299854439592,
+      "hit_rate_lower_95": 0.5289031752388424,
+      "mean_abs_return": 0.010104010336592346
+    },
+    {
+      "top_share": 0.1,
+      "min_confidence": 0.6,
+      "independent_signals": 209,
+      "hits": 115,
+      "hit_rate": 0.5502392344497608,
+      "hit_rate_lower_95": 0.4824927841433892,
+      "mean_abs_return": 0.010006424066726475
+    }
+  ]
+}

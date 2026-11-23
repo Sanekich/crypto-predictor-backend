@@ -24,9 +24,7 @@ from typing import Any
 from app.ml.models.base import ReturnModel
 from app.ml.models.baselines import HistoricalMeanBaseline, RidgeBaseline, ZeroReturnBaseline
 from app.ml.models.direction_model import XGBoostDirectionModel
-from app.ml.models.neutral_direction_model import XGBoostNeutralDirectionModel
 from app.ml.models.quantile_model import HistoricalQuantileBaseline, XGBoostQuantileModel
-from app.ml.models.pytorch_gru_model import PyTorchGRUDirectionModel
 from app.ml.models.meta_accept_skip_model import MetaAcceptSkipModel
 from app.ml.models.xgboost_model import XGBoostReturnModel
 
@@ -40,15 +38,14 @@ MODEL_TYPES: dict[str, type[ReturnModel]] = {
         XGBoostQuantileModel,
         HistoricalQuantileBaseline,
         XGBoostDirectionModel,
-        XGBoostNeutralDirectionModel,
-        PyTorchGRUDirectionModel,
     )
 }
 MODEL_TYPES["xgboost_direction_v2"] = XGBoostDirectionModel
 MODEL_TYPES["xgboost_direction_v3"] = XGBoostDirectionModel
 # New logic (app/ml/barrier): same classifier, different target; stored in artifacts/barrier
 MODEL_TYPES["xgboost_barrier_direction"] = XGBoostDirectionModel
-MODEL_TYPES["pytorch_gru_barrier_direction"] = PyTorchGRUDirectionModel
+# Volatility ("big move") models: same calibrated binary classifier; stored in artifacts/volatility
+MODEL_TYPES["xgboost_volatility"] = XGBoostDirectionModel
 # Isolated experiment: causal state/shock features, stored under artifacts/experiments.
 MODEL_TYPES["xgboost_state_aware_barrier"] = XGBoostDirectionModel
 MODEL_TYPES["xgboost_meta_accept_skip"] = MetaAcceptSkipModel

@@ -1,0 +1,1125 @@
+{
+  "created_at": "2026-11-23T16:16:22.796839+00:00",
+  "period": {
+    "start": "2020-10-07T23:00:00+00:00",
+    "end": "2026-11-22T23:00:00+00:00"
+  },
+  "hours_with_index": 46518,
+  "gate": {
+    "min_independent_signals": 77,
+    "min_hit_rate": 0.75,
+    "min_hit_rate_lower_95": 0.7
+  },
+  "results": [
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 1.0,
+      "horizon": "24h",
+      "events": 65,
+      "hits": 34,
+      "hit_rate": 0.5230769230769231,
+      "hit_rate_lower_95": 0.40379420402276267,
+      "mean_return": 0.002298352411454249,
+      "median_return": -3.115412986520738e-05,
+      "base_rate": 0.48583840512699195,
+      "edge_vs_base": 0.03723851794993116,
+      "positive_years": 6,
+      "years": 7,
+      "by_year": {
+        "2020": {
+          "events": 6,
+          "hits": 3,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.1876128068994087,
+          "mean_return": -0.0014324275521712115,
+          "median_return": -0.003171379080489256
+        },
+        "2021": {
+          "events": 6,
+          "hits": 3,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.1876128068994087,
+          "mean_return": 0.01433873233784431,
+          "median_return": 0.006658907967975858
+        },
+        "2022": {
+          "events": 6,
+          "hits": 4,
+          "hit_rate": 0.6666666666666666,
+          "hit_rate_lower_95": 0.2999883213415286,
+          "mean_return": -0.012890851104412146,
+          "median_return": -0.004786624601021361
+        },
+        "2023": {
+          "events": 19,
+          "hits": 10,
+          "hit_rate": 0.5263157894736842,
+          "hit_rate_lower_95": 0.31707482511825114,
+          "mean_return": -0.0005003517614614186,
+          "median_return": -3.115412986520738e-05
+        },
+        "2024": {
+          "events": 18,
+          "hits": 9,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.2903070395897999,
+          "mean_return": 0.004911465324978147,
+          "median_return": -0.001291594124052664
+        },
+        "2025": {
+          "events": 5,
+          "hits": 3,
+          "hit_rate": 0.6,
+          "hit_rate_lower_95": 0.23071993220883702,
+          "mean_return": 0.00025992268210570655,
+          "median_return": -0.0034918971500355056
+        },
+        "2026": {
+          "events": 5,
+          "hits": 2,
+          "hit_rate": 0.4,
+          "hit_rate_lower_95": 0.11761823115925325,
+          "mean_return": 0.013820175772918452,
+          "median_return": 0.007306703900512579
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 1.0,
+      "horizon": "24h",
+      "events": 60,
+      "hits": 33,
+      "hit_rate": 0.55,
+      "hit_rate_lower_95": 0.424917145489815,
+      "mean_return": 0.005265860567761896,
+      "median_return": 0.004214230953257236,
+      "base_rate": 0.514161594873008,
+      "edge_vs_base": 0.03583840512699199,
+      "positive_years": 3,
+      "years": 6,
+      "by_year": {
+        "2021": {
+          "events": 9,
+          "hits": 7,
+          "hit_rate": 0.7777777777777778,
+          "hit_rate_lower_95": 0.4525833436728054,
+          "mean_return": 0.020846582173820367,
+          "median_return": 0.0359435809035864
+        },
+        "2022": {
+          "events": 11,
+          "hits": 4,
+          "hit_rate": 0.36363636363636365,
+          "hit_rate_lower_95": 0.15166223614131386,
+          "mean_return": -0.010598919424949525,
+          "median_return": -0.02978681186890142
+        },
+        "2023": {
+          "events": 3,
+          "hits": 2,
+          "hit_rate": 0.6666666666666666,
+          "hit_rate_lower_95": 0.20765495512648788,
+          "mean_return": 0.02582986775052354,
+          "median_return": 0.003734445223806837
+        },
+        "2024": {
+          "events": 11,
+          "hits": 8,
+          "hit_rate": 0.7272727272727273,
+          "hit_rate_lower_95": 0.4343497069897538,
+          "mean_return": 0.011462295230530772,
+          "median_return": 0.019794486001519784
+        },
+        "2025": {
+          "events": 19,
+          "hits": 9,
+          "hit_rate": 0.47368421052631576,
+          "hit_rate_lower_95": 0.2732950548744854,
+          "mean_return": 0.004705183429361384,
+          "median_return": -6.940678449951498e-05
+        },
+        "2026": {
+          "events": 7,
+          "hits": 3,
+          "hit_rate": 0.42857142857142855,
+          "hit_rate_lower_95": 0.1582169222626268,
+          "mean_return": -0.0068646896813571645,
+          "median_return": -0.0026859585230190053
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 1.5,
+      "horizon": "24h",
+      "events": 18,
+      "hits": 8,
+      "hit_rate": 0.4444444444444444,
+      "hit_rate_lower_95": 0.24559231101389123,
+      "mean_return": 0.011254023311078918,
+      "median_return": 0.0011168058684057902,
+      "base_rate": 0.48583840512699195,
+      "edge_vs_base": -0.041393960682547526,
+      "positive_years": 3,
+      "years": 5,
+      "by_year": {
+        "2020": {
+          "events": 4,
+          "hits": 2,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.15003570882017145,
+          "mean_return": 0.0006366370775562069,
+          "median_return": -0.003171379080489256
+        },
+        "2021": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": -0.01566113406220343,
+          "median_return": -0.01566113406220343
+        },
+        "2023": {
+          "events": 5,
+          "hits": 3,
+          "hit_rate": 0.6,
+          "hit_rate_lower_95": 0.23071993220883702,
+          "mean_return": -0.002227326874152236,
+          "median_return": -0.003980926674976515
+        },
+        "2024": {
+          "events": 6,
+          "hits": 2,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.09676933255921684,
+          "mean_return": 0.028288443498162896,
+          "median_return": 0.032321877142094335
+        },
+        "2026": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.07275411279538635,
+          "median_return": 0.07275411279538635
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 1.5,
+      "horizon": "24h",
+      "events": 25,
+      "hits": 19,
+      "hit_rate": 0.76,
+      "hit_rate_lower_95": 0.5656994004476144,
+      "mean_return": 0.01983217832320394,
+      "median_return": 0.016445002936607667,
+      "base_rate": 0.514161594873008,
+      "edge_vs_base": 0.24583840512699195,
+      "positive_years": 5,
+      "years": 6,
+      "by_year": {
+        "2021": {
+          "events": 3,
+          "hits": 3,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.4384939195509822,
+          "mean_return": 0.027599778996687235,
+          "median_return": 0.02066897913874355
+        },
+        "2022": {
+          "events": 5,
+          "hits": 3,
+          "hit_rate": 0.6,
+          "hit_rate_lower_95": 0.23071993220883702,
+          "mean_return": 0.020752596562280456,
+          "median_return": 0.011026458080153345
+        },
+        "2023": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.001765947647194288,
+          "median_return": 0.001765947647194288
+        },
+        "2024": {
+          "events": 3,
+          "hits": 3,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.4384939195509822,
+          "mean_return": 0.05507773899665066,
+          "median_return": 0.06749023777979235
+        },
+        "2025": {
+          "events": 6,
+          "hits": 6,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.6096569663469354,
+          "mean_return": 0.02420286317514238,
+          "median_return": 0.02399193734787952
+        },
+        "2026": {
+          "events": 7,
+          "hits": 3,
+          "hit_rate": 0.42857142857142855,
+          "hit_rate_lower_95": 0.1582169222626268,
+          "mean_return": -0.0004248864870522847,
+          "median_return": -0.002660848294547935
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 2.0,
+      "horizon": "24h",
+      "events": 5,
+      "hits": 3,
+      "hit_rate": 0.6,
+      "hit_rate_lower_95": 0.23071993220883702,
+      "mean_return": -0.01011064684027978,
+      "median_return": -0.020303419848160864,
+      "base_rate": 0.48583840512699195,
+      "edge_vs_base": 0.11416159487300803,
+      "positive_years": 2,
+      "years": 3,
+      "by_year": {
+        "2020": {
+          "events": 2,
+          "hits": 2,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.3423719528896193,
+          "mean_return": -0.036220472437456463,
+          "median_return": -0.036220472437456463
+        },
+        "2024": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": 0.00451909222012481,
+          "median_return": 0.00451909222012481
+        },
+        "2026": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.012849526233264408,
+          "median_return": 0.012849526233264408
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 2.0,
+      "horizon": "24h",
+      "events": 7,
+      "hits": 6,
+      "hit_rate": 0.8571428571428571,
+      "hit_rate_lower_95": 0.4868654966809702,
+      "mean_return": 0.05336680661107407,
+      "median_return": 0.07874347209948596,
+      "base_rate": 0.514161594873008,
+      "edge_vs_base": 0.34298126226984904,
+      "positive_years": 4,
+      "years": 5,
+      "by_year": {
+        "2022": {
+          "events": 2,
+          "hits": 2,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.3423719528896193,
+          "mean_return": 0.08754790021979353,
+          "median_return": 0.08754790021979353
+        },
+        "2023": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.008016769888067987,
+          "median_return": 0.008016769888067987
+        },
+        "2024": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.08253041099709679,
+          "median_return": 0.08253041099709679
+        },
+        "2025": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": 0.0051626883487715935,
+          "median_return": 0.0051626883487715935
+        },
+        "2026": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.09759928825522346,
+          "median_return": 0.09759928825522346
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 1.0,
+      "horizon": "72h",
+      "events": 48,
+      "hits": 23,
+      "hit_rate": 0.4791666666666667,
+      "hit_rate_lower_95": 0.34471090015787464,
+      "mean_return": 0.007609801972015999,
+      "median_return": 0.001713906625119832,
+      "base_rate": 0.48386471765946915,
+      "edge_vs_base": -0.0046980509928024605,
+      "positive_years": 4,
+      "years": 7,
+      "by_year": {
+        "2020": {
+          "events": 4,
+          "hits": 3,
+          "hit_rate": 0.75,
+          "hit_rate_lower_95": 0.30063605244263664,
+          "mean_return": 0.005528876787821491,
+          "median_return": -0.008638032325308742
+        },
+        "2021": {
+          "events": 4,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.04234970307026226,
+          "median_return": 0.041905086627593735
+        },
+        "2022": {
+          "events": 6,
+          "hits": 4,
+          "hit_rate": 0.6666666666666666,
+          "hit_rate_lower_95": 0.2999883213415286,
+          "mean_return": -0.030689951687916366,
+          "median_return": -0.046798357442797034
+        },
+        "2023": {
+          "events": 15,
+          "hits": 5,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.15176100694691236,
+          "mean_return": 0.013263753451454467,
+          "median_return": 0.010995618781491023
+        },
+        "2024": {
+          "events": 11,
+          "hits": 5,
+          "hit_rate": 0.45454545454545453,
+          "hit_rate_lower_95": 0.21270957543988048,
+          "mean_return": 0.015723037315711372,
+          "median_return": 0.009409902383255675
+        },
+        "2025": {
+          "events": 4,
+          "hits": 3,
+          "hit_rate": 0.75,
+          "hit_rate_lower_95": 0.30063605244263664,
+          "mean_return": -0.019306752180883235,
+          "median_return": -0.020859770717254367
+        },
+        "2026": {
+          "events": 4,
+          "hits": 3,
+          "hit_rate": 0.75,
+          "hit_rate_lower_95": 0.30063605244263664,
+          "mean_return": 0.015803295457705507,
+          "median_return": -0.010471939051684032
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 1.0,
+      "horizon": "72h",
+      "events": 47,
+      "hits": 24,
+      "hit_rate": 0.5106382978723404,
+      "hit_rate_lower_95": 0.37242217589372884,
+      "mean_return": 0.012757522048729864,
+      "median_return": 0.0014428082132089681,
+      "base_rate": 0.5161352823405309,
+      "edge_vs_base": -0.005496984468190469,
+      "positive_years": 3,
+      "years": 6,
+      "by_year": {
+        "2021": {
+          "events": 6,
+          "hits": 4,
+          "hit_rate": 0.6666666666666666,
+          "hit_rate_lower_95": 0.2999883213415286,
+          "mean_return": 0.032258193086951305,
+          "median_return": 0.04811196060929546
+        },
+        "2022": {
+          "events": 9,
+          "hits": 3,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.12058159868274292,
+          "mean_return": -0.004914642642068571,
+          "median_return": -0.012343249663724576
+        },
+        "2023": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": 0.09625399150725866,
+          "median_return": 0.09625399150725866
+        },
+        "2024": {
+          "events": 9,
+          "hits": 5,
+          "hit_rate": 0.5555555555555556,
+          "hit_rate_lower_95": 0.26664734574402965,
+          "mean_return": 0.01863526020650314,
+          "median_return": 0.0015156601438950368
+        },
+        "2025": {
+          "events": 14,
+          "hits": 10,
+          "hit_rate": 0.7142857142857143,
+          "hit_rate_lower_95": 0.4535045882751561,
+          "mean_return": 0.015957725868674968,
+          "median_return": 0.019617409413525633
+        },
+        "2026": {
+          "events": 7,
+          "hits": 1,
+          "hit_rate": 0.14285714285714285,
+          "hit_rate_lower_95": 0.02567895594897479,
+          "mean_return": -0.019049617926754605,
+          "median_return": -0.019111786342555503
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 1.5,
+      "horizon": "72h",
+      "events": 12,
+      "hits": 5,
+      "hit_rate": 0.4166666666666667,
+      "hit_rate_lower_95": 0.19325746190524656,
+      "mean_return": 0.019359981175787345,
+      "median_return": 0.006740285594161066,
+      "base_rate": 0.48386471765946915,
+      "edge_vs_base": -0.06719805099280246,
+      "positive_years": 2,
+      "years": 5,
+      "by_year": {
+        "2020": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": 0.0019984164525875814,
+          "median_return": 0.0019984164525875814
+        },
+        "2021": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.03438586458571202,
+          "median_return": 0.03438586458571202
+        },
+        "2023": {
+          "events": 3,
+          "hits": 1,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.061490315276160515,
+          "mean_return": 0.00419175949446704,
+          "median_return": 0.0048959523971263685
+        },
+        "2024": {
+          "events": 5,
+          "hits": 3,
+          "hit_rate": 0.6,
+          "hit_rate_lower_95": 0.23071993220883702,
+          "mean_return": 0.023375843837608733,
+          "median_return": -0.0024085204025761087
+        },
+        "2026": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.06448257894711618,
+          "median_return": 0.06448257894711618
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 1.5,
+      "horizon": "72h",
+      "events": 15,
+      "hits": 10,
+      "hit_rate": 0.6666666666666666,
+      "hit_rate_lower_95": 0.4171312515121298,
+      "mean_return": 0.025019421734892043,
+      "median_return": 0.03105418173911323,
+      "base_rate": 0.5161352823405309,
+      "edge_vs_base": 0.15053138432613578,
+      "positive_years": 3,
+      "years": 6,
+      "by_year": {
+        "2021": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.10683082930035859,
+          "median_return": 0.10683082930035859
+        },
+        "2022": {
+          "events": 3,
+          "hits": 1,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.061490315276160515,
+          "mean_return": -0.029967380906470442,
+          "median_return": -0.03217179039667051
+        },
+        "2023": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.002798802487141927,
+          "median_return": 0.002798802487141927
+        },
+        "2024": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": 0.0461335847309185,
+          "median_return": 0.0461335847309185
+        },
+        "2025": {
+          "events": 4,
+          "hits": 4,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.5100999795960008,
+          "mean_return": 0.06181625278081898,
+          "median_return": 0.038403201368204964
+        },
+        "2026": {
+          "events": 4,
+          "hits": 2,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.15003570882017145,
+          "mean_return": 0.00400791409254464,
+          "median_return": 0.0021575377566173115
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 2.0,
+      "horizon": "72h",
+      "events": 5,
+      "hits": 2,
+      "hit_rate": 0.4,
+      "hit_rate_lower_95": 0.11761823115925325,
+      "mean_return": -0.012858223563411552,
+      "median_return": 0.00793820713013238,
+      "base_rate": 0.48386471765946915,
+      "edge_vs_base": -0.08386471765946912,
+      "positive_years": 2,
+      "years": 3,
+      "by_year": {
+        "2020": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": -0.03381312661936231,
+          "median_return": -0.03381312661936231
+        },
+        "2024": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": -0.0048749409038517655,
+          "median_return": -0.0048749409038517655
+        },
+        "2026": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.013085017229370388,
+          "median_return": 0.013085017229370388
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 2.0,
+      "horizon": "72h",
+      "events": 6,
+      "hits": 6,
+      "hit_rate": 1.0,
+      "hit_rate_lower_95": 0.6096569663469354,
+      "mean_return": 0.0573595691465237,
+      "median_return": 0.050268877727815076,
+      "base_rate": 0.5161352823405309,
+      "edge_vs_base": 0.48386471765946915,
+      "positive_years": 5,
+      "years": 5,
+      "by_year": {
+        "2022": {
+          "events": 2,
+          "hits": 2,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.3423719528896193,
+          "mean_return": 0.050268877727815076,
+          "median_return": 0.050268877727815076
+        },
+        "2023": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.006061544963798626,
+          "median_return": 0.006061544963798626
+        },
+        "2024": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.11218627640064294,
+          "median_return": 0.11218627640064294
+        },
+        "2025": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.01467915541065623,
+          "median_return": 0.01467915541065623
+        },
+        "2026": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.11069268264841425,
+          "median_return": 0.11069268264841425
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 1.0,
+      "horizon": "168h",
+      "events": 38,
+      "hits": 17,
+      "hit_rate": 0.4473684210526316,
+      "hit_rate_lower_95": 0.3014616531155089,
+      "mean_return": 0.014314596849385366,
+      "median_return": 0.010702634643931841,
+      "base_rate": 0.481015662078785,
+      "edge_vs_base": -0.03364724102615341,
+      "positive_years": 3,
+      "years": 7,
+      "by_year": {
+        "2020": {
+          "events": 3,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.04392647909169334,
+          "median_return": 0.03319989082549668
+        },
+        "2021": {
+          "events": 3,
+          "hits": 1,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.061490315276160515,
+          "mean_return": 0.037584875015468665,
+          "median_return": 0.07259951450380497
+        },
+        "2022": {
+          "events": 5,
+          "hits": 4,
+          "hit_rate": 0.8,
+          "hit_rate_lower_95": 0.37552826411853885,
+          "mean_return": -0.041179795304676435,
+          "median_return": -0.05409452446278096
+        },
+        "2023": {
+          "events": 10,
+          "hits": 3,
+          "hit_rate": 0.3,
+          "hit_rate_lower_95": 0.10778928748621182,
+          "mean_return": 0.02370435731277761,
+          "median_return": 0.01834765132753946
+        },
+        "2024": {
+          "events": 9,
+          "hits": 4,
+          "hit_rate": 0.4444444444444444,
+          "hit_rate_lower_95": 0.188775429471914,
+          "mean_return": 0.03689367381137523,
+          "median_return": 0.017925056148784257
+        },
+        "2025": {
+          "events": 4,
+          "hits": 3,
+          "hit_rate": 0.75,
+          "hit_rate_lower_95": 0.30063605244263664,
+          "mean_return": -0.042605069170051885,
+          "median_return": -0.029255086678842634
+        },
+        "2026": {
+          "events": 4,
+          "hits": 2,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.15003570882017145,
+          "mean_return": 0.02666330843214862,
+          "median_return": 0.018464470580408898
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 1.0,
+      "horizon": "168h",
+      "events": 34,
+      "hits": 22,
+      "hit_rate": 0.6470588235294118,
+      "hit_rate_lower_95": 0.4791365883001342,
+      "mean_return": 0.031124120297302577,
+      "median_return": 0.020743785878044263,
+      "base_rate": 0.518984337921215,
+      "edge_vs_base": 0.1280744856081968,
+      "positive_years": 3,
+      "years": 6,
+      "by_year": {
+        "2021": {
+          "events": 4,
+          "hits": 4,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.5100999795960008,
+          "mean_return": 0.08710274697784426,
+          "median_return": 0.0780914805280819
+        },
+        "2022": {
+          "events": 7,
+          "hits": 3,
+          "hit_rate": 0.42857142857142855,
+          "hit_rate_lower_95": 0.1582169222626268,
+          "mean_return": 0.02437593326296274,
+          "median_return": -0.006726224061395891
+        },
+        "2023": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": 0.15600533985703657,
+          "median_return": 0.15600533985703657
+        },
+        "2024": {
+          "events": 7,
+          "hits": 6,
+          "hit_rate": 0.8571428571428571,
+          "hit_rate_lower_95": 0.4868654966809702,
+          "mean_return": 0.031591962004203236,
+          "median_return": 0.02225564063791574
+        },
+        "2025": {
+          "events": 9,
+          "hits": 6,
+          "hit_rate": 0.6666666666666666,
+          "hit_rate_lower_95": 0.35419734749908977,
+          "mean_return": 0.031668999328986626,
+          "median_return": 0.044714787803790124
+        },
+        "2026": {
+          "events": 5,
+          "hits": 2,
+          "hit_rate": 0.4,
+          "hit_rate_lower_95": 0.11761823115925325,
+          "mean_return": -0.05579956766964082,
+          "median_return": -0.01614697581032587
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 1.5,
+      "horizon": "168h",
+      "events": 9,
+      "hits": 1,
+      "hit_rate": 0.1111111111111111,
+      "hit_rate_lower_95": 0.019890371327130518,
+      "mean_return": 0.04729450858917387,
+      "median_return": 0.03312634623018873,
+      "base_rate": 0.481015662078785,
+      "edge_vs_base": -0.3699045509676739,
+      "positive_years": 0,
+      "years": 5,
+      "by_year": {
+        "2020": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.017229262036230875,
+          "median_return": 0.017229262036230875
+        },
+        "2021": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.03312634623018873,
+          "median_return": 0.03312634623018873
+        },
+        "2023": {
+          "events": 3,
+          "hits": 1,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.061490315276160515,
+          "mean_return": 0.03229499348524142,
+          "median_return": 0.021137449727660185
+        },
+        "2024": {
+          "events": 3,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.059826425907528735,
+          "median_return": 0.05833441450792143
+        },
+        "2026": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.09893071085783478,
+          "median_return": 0.09893071085783478
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 1.5,
+      "horizon": "168h",
+      "events": 11,
+      "hits": 6,
+      "hit_rate": 0.5454545454545454,
+      "hit_rate_lower_95": 0.2800877556899882,
+      "mean_return": 0.0009046281643667609,
+      "median_return": 0.00023067475243720992,
+      "base_rate": 0.518984337921215,
+      "edge_vs_base": 0.026470207533330403,
+      "positive_years": 3,
+      "years": 6,
+      "by_year": {
+        "2021": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.037659333783182536,
+          "median_return": 0.037659333783182536
+        },
+        "2022": {
+          "events": 3,
+          "hits": 1,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.061490315276160515,
+          "mean_return": -0.03168997831242959,
+          "median_return": -0.03641122042629075
+        },
+        "2023": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.00023067475243720992,
+          "median_return": 0.00023067475243720992
+        },
+        "2024": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.13211909746452677,
+          "median_return": 0.13211909746452677
+        },
+        "2025": {
+          "events": 2,
+          "hits": 1,
+          "hit_rate": 0.5,
+          "hit_rate_lower_95": 0.09452865480086611,
+          "mean_return": 0.027913506814591538,
+          "median_return": 0.027913506814591538
+        },
+        "2026": {
+          "events": 3,
+          "hits": 1,
+          "hit_rate": 0.3333333333333333,
+          "hit_rate_lower_95": 0.061490315276160515,
+          "mean_return": -0.040271758294668815,
+          "median_return": -0.0550286404059146
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "euphoria",
+      "expected": "down",
+      "threshold": 2.0,
+      "horizon": "168h",
+      "events": 4,
+      "hits": 1,
+      "hit_rate": 0.25,
+      "hit_rate_lower_95": 0.045586062644636216,
+      "mean_return": 0.026628353716422304,
+      "median_return": 0.04813629915262019,
+      "base_rate": 0.481015662078785,
+      "edge_vs_base": -0.231015662078785,
+      "positive_years": 1,
+      "years": 3,
+      "by_year": {
+        "2020": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": -0.04845438528010626,
+          "median_return": -0.04845438528010626
+        },
+        "2024": {
+          "events": 2,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.055524725064559854,
+          "median_return": 0.055524725064559854
+        },
+        "2026": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": 0.04391835001667577,
+          "median_return": 0.04391835001667577
+        }
+      },
+      "passes_gate": false
+    },
+    {
+      "zone": "panic",
+      "expected": "up",
+      "threshold": 2.0,
+      "horizon": "168h",
+      "events": 6,
+      "hits": 5,
+      "hit_rate": 0.8333333333333334,
+      "hit_rate_lower_95": 0.4364905634363539,
+      "mean_return": 0.023122391558623445,
+      "median_return": 0.02617574165781078,
+      "base_rate": 0.518984337921215,
+      "edge_vs_base": 0.31434899541211836,
+      "positive_years": 4,
+      "years": 5,
+      "by_year": {
+        "2022": {
+          "events": 2,
+          "hits": 2,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.3423719528896193,
+          "mean_return": 0.03666044632709031,
+          "median_return": 0.03666044632709031
+        },
+        "2023": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.006857774675104622,
+          "median_return": 0.006857774675104622
+        },
+        "2024": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.07636236176218203,
+          "median_return": 0.07636236176218203
+        },
+        "2025": {
+          "events": 1,
+          "hits": 0,
+          "hit_rate": 0.0,
+          "hit_rate_lower_95": 0.0,
+          "mean_return": -0.04372393000146435,
+          "median_return": -0.04372393000146435
+        },
+        "2026": {
+          "events": 1,
+          "hits": 1,
+          "hit_rate": 1.0,
+          "hit_rate_lower_95": 0.20654329147389294,
+          "mean_return": 0.025917250261737745,
+          "median_return": 0.025917250261737745
+        }
+      },
+      "passes_gate": false
+    }
+  ]
+}

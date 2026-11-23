@@ -13,8 +13,6 @@ pyarrow
 # Machine Learning
 scikit-learn
 xgboost
-optuna
-torch
 
 # Market data (Binance REST + real-time streams)
 httpx

@@ -1,22 +1,39 @@
-"""Paper-trading only: independent virtual wallets for current models."""
+"""Paper trading (virtual only): strategy forward test + manual wallets per model.
+
+The strategy engine (app/services/paper_strategies.py) runs in the background every
+minute (see app/main.py) and trades fixed rules with fees and horizon exits. The
+manual wallets let a person open/close virtual positions for any current model.
+"""
 from __future__ import annotations
 
 import json
+import logging
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
+import pandas as pd
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from app.api.dependencies import _resolve, get_barrier_registry, get_experiment_registry, get_market_data_service, get_registry, get_signal_service
+from app.api.dependencies import (
+    _resolve,
+    get_barrier_registry,
+    get_experiment_registry,
+    get_market_data_service,
+    get_registry,
+    get_signal_service,
+    get_volatility_registry,
+)
+from app.api.routes.operations import _check_token
 from app.core.config import get_settings
 from app.data.derivatives.store import DerivativesStore
 from app.features.feature_pipeline import FeatureConfig, build_features, feature_columns
 from app.ml.experiments.state_features import build_state_features
 from app.ml.registry.model_registry import ModelRegistry
 from app.services.market_data_service import MarketDataService
+from app.services.paper_strategies import STRATEGIES, StrategyInputs, new_wallet, strategy_view, tick, utc_now
 from app.services.signal_service import SignalService
 
 router = APIRouter(prefix="/paper-trading", tags=["paper-trading"])
@@ -26,6 +43,7 @@ ExperimentRegistry = Annotated[ModelRegistry, Depends(get_experiment_registry)]
 MarketData = Annotated[MarketDataService, Depends(get_market_data_service)]
 Signal = Annotated[SignalService, Depends(get_signal_service)]
 _lock = threading.Lock()
+logger = logging.getLogger(__name__)
 STARTING_BALANCE = 10000.0
 
 
@@ -34,7 +52,7 @@ def _path() -> Path:
 
 
 def _empty() -> dict[str, Any]:
-    return {"wallets": {}, "controller": {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60}}
+    return {"wallets": {}, "strategies": {}, "controller": {"enabled": True, "last_tick": None, "last_action": "waiting for the first tick", "threshold": 0.60}}
 
 
 def _load() -> dict[str, Any]:
@@ -42,7 +60,8 @@ def _load() -> dict[str, Any]:
     if not path.exists():
         return _empty()
     data = json.loads(path.read_text(encoding="utf-8"))
-    data.setdefault("controller", {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60})
+    data.setdefault("controller", {"enabled": True, "last_tick": None, "last_action": "", "threshold": 0.60})
+    data.setdefault("strategies", {})
     if "wallets" in data:
         return data
     # One-time migration from the previous shared-wallet format.
@@ -195,35 +214,64 @@ def _close_wallet(wallet: dict[str, Any], model_id: str, price: float, reason: s
     return pnl
 
 
-def _controller_tick(data: dict[str, Any], models: list[dict[str, Any]], price: float, signal_service: SignalService, signal_response: Any | None = None) -> None:
-    controller = data.setdefault("controller", {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60})
-    if not controller.get("enabled"):
-        return
-    threshold = float(controller.get("threshold", 0.60))
-    promising_ids = {m["model_id"] for m in models if m.get("promising") and m.get("model_type") == "xgboost_direction"}
-    actions: list[str] = []
+def collect_inputs(market: MarketDataService, signal_service: SignalService, volatility: ModelRegistry) -> StrategyInputs:
+    """Live inputs of the strategies; a missing piece is left None and noted (the rule then skips)."""
+    candles = market.get_ohlcv("BTCUSDT", "1h")
+    inputs = StrategyInputs(now=utc_now(), price=float(candles["close"].iloc[-1]), candles=candles[["timestamp", "close"]])
     try:
-        signals = signal_response or signal_service.get_signals("BTCUSDT", threshold=threshold)
-        for signal in signals.horizons:
-            if signal.model_version not in promising_ids or signal.confidence < threshold:
-                continue
-            wallet = _wallet(data, signal.model_version)
-            position = wallet.get("position")
-            desired = "long" if signal.direction == "up" else "short"
-            if position and position["side"] != desired:
-                pnl = _close_wallet(wallet, signal.model_version, price, "opposite_signal")
-                actions.append(f"close {signal.horizon} {pnl:+.2f}")
-                position = None
-            if position is None:
-                notional = min(wallet["cash"] * 0.10, wallet["cash"])
-                if notional > 10:
-                    wallet["cash"] -= notional
-                    wallet["position"] = {"side": desired, "notional": notional, "entry_price": price, "opened_at": datetime.now(timezone.utc).isoformat()}
-                    actions.append(f"open {signal.horizon} {desired} {signal.confidence:.0%}")
-        controller["last_action"] = "; ".join(actions) if actions else "no qualifying signal"
-    except Exception as exc:  # controller must never stop the API
-        controller["last_action"] = f"signal unavailable: {type(exc).__name__}"
-    controller["last_tick"] = datetime.now(timezone.utc).isoformat()
+        response = signal_service.get_signals("BTCUSDT", threshold=0.50)
+        for item in response.horizons:
+            if item.horizon == "4h":
+                inputs.direction_4h = {"p_up": item.p_up, "confidence": item.confidence, "has_skill": item.has_skill,
+                                       "as_of": response.data_as_of.isoformat(), "model_id": item.model_version}
+    except Exception as exc:  # noqa: BLE001 - one missing input must not stop the others
+        inputs.notes.append(f"direction unavailable: {type(exc).__name__}")
+    try:
+        from app.api.routes.volatility import _forecast, _latest_by_variant
+
+        meta = next((m for m in _latest_by_variant(volatility) if m.get("variant") == "move_1pct_4h:candles"), None)
+        if meta is not None:
+            forecast = _forecast(volatility, meta, candles, None)
+            if forecast.get("available"):
+                inputs.p_move_4h = forecast["p_move"]
+    except Exception as exc:  # noqa: BLE001
+        inputs.notes.append(f"volatility unavailable: {type(exc).__name__}")
+    try:
+        from app.api.routes.euphoria import _frame
+
+        frame = _frame(_resolve(get_settings().data_dir))
+        valid = None if frame is None else frame.dropna(subset=["euphoria"])
+        if valid is not None and len(valid):
+            row = valid.iloc[-1]
+            inputs.euphoria = {"value": float(row["euphoria"]), "as_of": (row["timestamp"] + pd.Timedelta(hours=1)).isoformat()}
+    except Exception as exc:  # noqa: BLE001
+        inputs.notes.append(f"euphoria unavailable: {type(exc).__name__}")
+    return inputs
+
+
+def run_strategy_tick() -> list[str]:
+    """One engine step with the app's shared services (called by the background loop)."""
+    inputs = collect_inputs(get_market_data_service(), get_signal_service(), get_volatility_registry())
+    with _lock:
+        data = _load()
+        controller = data.setdefault("controller", {"enabled": True, "last_tick": None, "last_action": "", "threshold": 0.60})
+        if not controller.get("enabled"):
+            return []
+        actions = tick(data, inputs)
+        controller["last_tick"] = inputs.now.isoformat()
+        note = f" ({'; '.join(inputs.notes)})" if inputs.notes else ""
+        controller["last_action"] = "; ".join(actions) if actions else "no qualifying signal" + note
+        _save(data)
+    return actions
+
+
+def strategy_loop(stop: threading.Event, interval_seconds: int) -> None:
+    while not stop.is_set():
+        try:
+            run_strategy_tick()
+        except Exception:  # noqa: BLE001 - the loop must survive network or data errors
+            logger.exception("Paper strategy tick failed")
+        stop.wait(interval_seconds)
 
 
 class TradeRequest(BaseModel):
@@ -234,21 +282,22 @@ class TradeRequest(BaseModel):
 
 @router.get("/overview")
 def overview(registry: Registry, barrier: BarrierRegistry, experiments: ExperimentRegistry, market: MarketData, signal_service: Signal) -> dict[str, Any]:
-    with _lock:
+    """Read-only: trading happens in the background loop, never as a side effect of viewing."""
+    models = _models(registry, barrier, experiments)
+    price = _price(market)
+    try:
+        signal_response = signal_service.get_signals("BTCUSDT", threshold=0.50)
+        forecasts = {item.model_version: {"horizon": item.horizon, "direction": item.direction, "p_up": item.p_up, "confidence": item.confidence, "is_signal": item.is_signal, "has_skill": item.has_skill, "target_time": item.target_time.isoformat(), "status": item.status} for item in signal_response.horizons}
+    except Exception:
+        forecasts = {}
+    forecasts.update(_state_forecasts(experiments, market, models))
+    forecasts.update(_barrier_forecasts(barrier, market, models))
+    with _lock:  # load inside the lock: the background loop may have traded meanwhile
         data = _load()
-        models = _models(registry, barrier, experiments)
-        price = _price(market)
-        try:
-            signal_response = signal_service.get_signals("BTCUSDT", threshold=0.50)
-            forecasts = {item.model_version: {"horizon": item.horizon, "direction": item.direction, "p_up": item.p_up, "confidence": item.confidence, "is_signal": item.is_signal, "has_skill": item.has_skill, "target_time": item.target_time.isoformat(), "status": item.status} for item in signal_response.horizons}
-        except Exception:
-            signal_response = None
-            forecasts = {}
-        forecasts.update(_state_forecasts(experiments, market, models))
-        forecasts.update(_barrier_forecasts(barrier, market, models))
-        _controller_tick(data, models, price, signal_service, signal_response)
-        _save(data)
-        return _overview(data, price, models, forecasts)
+        result = _overview(data, price, models, forecasts)
+    wallets = data.get("strategies") or {}
+    result["strategies"] = [strategy_view(s, wallets.get(s.id) or new_wallet(), price) for s in STRATEGIES]
+    return result
 
 
 @router.post("/trade")
@@ -282,7 +331,11 @@ def close_trade(model_id: str, registry: Registry, barrier: BarrierRegistry, exp
 
 
 @router.post("/reset")
-def reset_portfolio() -> dict[str, str]:
+def reset_portfolio(
+    x_operations_token: str | None = Header(default=None),
+    x_operations_token_b64: str | None = Header(default=None),
+) -> dict[str, str]:
+    _check_token(x_operations_token, x_operations_token_b64)
     with _lock:
         _save(_empty())
     return {"status": "reset", "balance_per_model": f"{STARTING_BALANCE:.2f}"}
@@ -293,7 +346,12 @@ class ControllerRequest(BaseModel):
 
 
 @router.post("/controller")
-def set_controller(request: ControllerRequest) -> dict[str, Any]:
+def set_controller(
+    request: ControllerRequest,
+    x_operations_token: str | None = Header(default=None),
+    x_operations_token_b64: str | None = Header(default=None),
+) -> dict[str, Any]:
+    _check_token(x_operations_token, x_operations_token_b64)
     with _lock:
         data = _load()
         controller = data.setdefault("controller", {"enabled": False, "last_tick": None, "last_action": "off", "threshold": 0.60})

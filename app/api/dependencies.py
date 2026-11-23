@@ -31,6 +31,12 @@ def get_barrier_registry() -> ModelRegistry:
 
 
 @lru_cache
+def get_volatility_registry() -> ModelRegistry:
+    """Volatility ("big move") models: artifacts/volatility/models."""
+    return ModelRegistry(_resolve(get_settings().model_artifacts_dir) / "volatility")
+
+
+@lru_cache
 def get_experiment_registry() -> ModelRegistry:
     """Isolated shadow experiments: artifacts/models/experiments."""
     return ModelRegistry(_resolve(get_settings().model_artifacts_dir) / "experiments")

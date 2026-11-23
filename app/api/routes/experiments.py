@@ -48,7 +48,7 @@ def overview(registry: ExperimentRegistry) -> dict[str, Any]:
     models = [
         _summary(meta)
         for meta in registry.list()
-        if meta.get("model_type") in {"xgboost_state_aware_barrier", "pytorch_gru_barrier_direction", "xgboost_meta_accept_skip"}
+        if meta.get("model_type") in {"xgboost_state_aware_barrier", "xgboost_meta_accept_skip"}
         and meta.get("symbol", "BTCUSDT") == "BTCUSDT"
     ]
     return {"models": models[:20], "latest": models[0] if models else None}

@@ -10,6 +10,7 @@ the candle they are computed for - this is what prevents look-ahead leakage.
 | premium        | Binance /fapi/v1/premiumIndexKlines (1h) | 1 h    | candle open + 1 h         |
 | metrics        | data.binance.vision daily metrics zips   | 5 min  | create_time               |
 | dvol           | Deribit get_volatility_index_data (1h)   | 1 h    | candle open + 1 h         |
+| fear_greed     | alternative.me Fear & Greed Index        | 1 day  | day start + 24 h (safe)   |
 """
 
 import io
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 FAPI = "https://fapi.binance.com"
 VISION = "https://data.binance.vision/data/futures/um/daily/metrics"
 DERIBIT = "https://www.deribit.com/api/v2/public/get_volatility_index_data"
+FEAR_GREED = "https://api.alternative.me/fng/"
 HOUR_MS = 3_600_000
 
 
@@ -164,3 +166,19 @@ def fetch_dvol(client: httpx.Client, currency: str, start_ms: int, end_ms: int) 
     df = pd.DataFrame(rows, columns=["t", "open", "high", "low", "close"]).drop_duplicates("t")
     ts = pd.to_datetime(df["t"].astype("int64"), unit="ms", utc=True)
     return pd.DataFrame({"timestamp": ts, "available_at": ts + pd.Timedelta(hours=1), "dvol": df["close"].astype(float)})
+
+
+def fetch_fear_greed(client: httpx.Client) -> pd.DataFrame:
+    """Crypto Fear & Greed Index (0 = extreme fear, 100 = extreme greed), daily since 2018-02.
+
+    The value stamped with day D is computed around 00:00 UTC of D. Its exact
+    publication time in the past is unknown, so it is treated as known only at the
+    END of day D (+24 h): a day late at worst, never early.
+    """
+    rows = _get(client, FEAR_GREED, {"limit": 0, "format": "json"}).json().get("data") or []
+    if not rows:
+        return pd.DataFrame(columns=["timestamp", "available_at", "fear_greed"])
+    df = pd.DataFrame(rows)
+    ts = pd.to_datetime(df["timestamp"].astype("int64"), unit="s", utc=True)
+    frame = pd.DataFrame({"timestamp": ts, "available_at": ts + pd.Timedelta(hours=24), "fear_greed": df["value"].astype(float)})
+    return frame.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)

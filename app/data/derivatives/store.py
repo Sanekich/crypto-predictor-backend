@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-DATASETS = ("funding", "premium", "metrics", "dvol")
+DATASETS = ("funding", "premium", "metrics", "dvol", "fear_greed")
 
 
 class DerivativesStore:

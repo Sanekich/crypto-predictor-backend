@@ -25,14 +25,13 @@ _lock = threading.Lock()
 
 
 class OperationRequest(BaseModel):
-    action: Literal["status", "train_direction", "walk_forward", "regime_report", "train_barrier", "train_pytorch", "train_state_barrier", "train_meta_label"]
-    horizon: Literal["24h", "7d"] = "24h"
-    feature_set: Literal["v1", "v2_funding_basis", "v3_open_interest", "pytorch_full_derivatives"] = "v1"
+    action: Literal["status", "train_direction", "walk_forward", "regime_report", "train_barrier", "train_state_barrier", "train_meta_label", "train_volatility"]
+    # 1h and 4h are the only old-logic horizons with stable skill (the site's 1-4h signals)
+    horizon: Literal["1h", "4h", "24h", "7d"] = "4h"
+    feature_set: Literal["v1", "v2_funding_basis", "v3_open_interest"] = "v1"
     # New logic (train_barrier): which configuration / feature set to train, or "all"
     barrier_config: str = "all"
     barrier_feature_set: str = "all"
-    pytorch_feature_set: Literal["candles", "all_data"] = "all_data"
-    pytorch_sequence_length: Literal[168, 336] = 336
     start_date: str | None = None
     exclude_recent_days: int = Field(default=0, ge=0, le=3650)
 
@@ -86,14 +85,8 @@ def _command(request: OperationRequest) -> list[str]:
         return ["scripts/walk_forward_report.py", "--horizon", request.horizon, "--feature-set", request.feature_set]
     if request.action == "train_barrier":
         return ["scripts/train_barrier_models.py", "--config", request.barrier_config, "--feature-set", request.barrier_feature_set]
-    if request.action == "train_pytorch":
-        return [
-            "scripts/train_pytorch_barrier_model.py",
-            "--config", "move_1pct_24h",
-            "--feature-set", request.pytorch_feature_set,
-            "--sequence-length", str(request.pytorch_sequence_length),
-            "--shadow-only",
-        ]
+    if request.action == "train_volatility":
+        return ["scripts/train_volatility_models.py", "--feature-set", request.barrier_feature_set]
     if request.action == "train_state_barrier":
         return [
             "scripts/train_state_aware_barrier_model.py",
@@ -165,7 +158,7 @@ def run_operation(
             "job_id": job_id,
             "action": request.action,
             "horizon": request.horizon,
-            "feature_set": (f"pytorch_{request.pytorch_feature_set}_{request.pytorch_sequence_length}h" if request.action == "train_pytorch" else f"state_barrier_{request.barrier_feature_set}" if request.action == "train_state_barrier" else f"meta_accept_skip_{request.barrier_feature_set}" if request.action == "train_meta_label" else request.feature_set),
+            "feature_set": (f"state_barrier_{request.barrier_feature_set}" if request.action == "train_state_barrier" else f"meta_accept_skip_{request.barrier_feature_set}" if request.action == "train_meta_label" else request.feature_set),
             "barrier_config": request.barrier_config if request.action == "train_barrier" else None,
             "barrier_feature_set": request.barrier_feature_set if request.action == "train_barrier" else None,
             "status": "running",

@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     model_artifacts_dir: Path = Path("artifacts")
     operations_token: str | None = None
+    # Paper-trading strategies run in a background thread of the API (forward test)
+    paper_trading_loop: bool = True
+    paper_trading_interval_seconds: int = 60
 
 
 @lru_cache

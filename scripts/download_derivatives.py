@@ -27,6 +27,7 @@ STARTS = {
     "premium": datetime(2019, 12, 1, tzinfo=timezone.utc),
     "metrics": datetime(2020, 9, 1, tzinfo=timezone.utc),
     "dvol": datetime(2021, 3, 24, tzinfo=timezone.utc),
+    "fear_greed": datetime(2018, 2, 1, tzinfo=timezone.utc),
 }
 
 
@@ -59,6 +60,10 @@ def main(argv: list[str] | None = None) -> int:
                 frame = sources.fetch_premium(client, symbol, ms(start))
                 # Drop the still-open hourly candle
                 frame = frame[frame["available_at"] <= now]
+            elif dataset == "fear_greed":
+                # Small daily series: always fetched in full
+                frame = sources.fetch_fear_greed(client)
+                frame = frame[frame["available_at"] <= now + timedelta(days=1)]
             elif dataset == "dvol":
                 frame = sources.fetch_dvol(client, symbol[:3], ms(start), ms(now))
                 frame = frame[frame["available_at"] <= now]

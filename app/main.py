@@ -1,10 +1,31 @@
+import threading
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import barrier, data_status, experiments, health, live, model_history, models, operations, paper_trading, predictions, pytorch, signals, training_stage
+from app.api.routes import barrier, data_status, euphoria, experiments, health, live, model_history, models, operations, paper_trading, predictions, signals, training_stage, volatility
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Background paper-trading strategies (forward test), one tick per interval."""
+    settings = get_settings()
+    stop = threading.Event()
+    worker = None
+    if settings.paper_trading_loop:
+        worker = threading.Thread(
+            target=paper_trading.strategy_loop, args=(stop, settings.paper_trading_interval_seconds), name="paper-strategies", daemon=True
+        )
+        worker.start()
+    yield
+    stop.set()
+    if worker is not None:
+        worker.join(timeout=5)
 
 
 def create_app() -> FastAPI:
@@ -15,6 +36,7 @@ def create_app() -> FastAPI:
         title=settings.app_name,
         version=settings.app_version,
         debug=settings.debug,
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -43,7 +65,8 @@ def create_app() -> FastAPI:
     app.include_router(training_stage.router)
     app.include_router(signals.router)
     app.include_router(barrier.router)
-    app.include_router(pytorch.router)
+    app.include_router(volatility.router)
+    app.include_router(euphoria.router)
     app.include_router(experiments.router)
     app.include_router(model_history.router)
     app.include_router(paper_trading.router)

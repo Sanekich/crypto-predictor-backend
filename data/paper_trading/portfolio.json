@@ -1,0 +1,80 @@
+{
+  "wallets": {
+    "barrier-move-1pct-24h-candles-btcusdt-1h-20261114-091144": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": []
+    },
+    "xgboost-direction-btcusdt-1h-h1h-20261112-203158": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": []
+    },
+    "xgboost-direction-btcusdt-1h-h4h-20261112-203214": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": []
+    },
+    "xgboost-quantile-btcusdt-1h-h24h-20261110-173047": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": []
+    },
+    "xgboost-quantile-btcusdt-1h-h7d-20261110-173121": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": []
+    },
+    "state-aware-barrier-move-1pct-24h-candles-btcusdt-1h-20261120-223118": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": []
+    }
+  },
+  "controller": {
+    "enabled": true,
+    "last_tick": "2026-11-23T16:25:54.334652+00:00",
+    "last_action": "no qualifying signal",
+    "threshold": 0.6
+  },
+  "strategies": {
+    "direction-4h-60": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": [],
+      "last_signal": null
+    },
+    "direction-4h-60-vol": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": [],
+      "last_signal": null
+    },
+    "direction-4h-55-vol": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": [],
+      "last_signal": null
+    },
+    "panic-bounce-24h": {
+      "initial_balance": 10000.0,
+      "cash": 10000.0,
+      "position": null,
+      "trades": [],
+      "last_signal": null
+    }
+  },
+  "euphoria_previous": {
+    "as_of": "2026-11-23T00:00:00+00:00",
+    "value": -0.9920747707040196
+  }
+}
